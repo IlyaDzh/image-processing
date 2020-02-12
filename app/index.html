@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photoshop</title>
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/accordion.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://kit.fontawesome.com/bbd0f0ce77.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">
+            <img src="./img/photoshop.png" width="30" height="30" class="d-inline-block align-top" alt="Photoshop">
+            Photoshop
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav m-auto">
+                <li class="nav-item">
+                    <label for="btn-load" class="nav-link mb-0" style="cursor: pointer">
+                        <i class="icon icon-open"></i>
+                        Открыть
+                        <input id="btn-load" type="file" style="display: none;">
+                    </label>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="icon icon-undo"></i>
+                        Назад
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="icon icon-redo"></i>
+                        Вперед
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="icon icon-original"></i>
+                        Оригинал
+                    </a>
+                </li>
+                <li class="nav-item" id="btn-save">
+                    <a class="nav-link" href="#">
+                        <i class="icon icon-save"></i>
+                        Сохранить
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="aside">
+        <div class="accordion-container">
+            <div class="panel">
+                <div class="heading">
+                    <i class="fas fa-crop-alt aside-icon"></i>
+                    Обрезка
+                </div>
+                <div class="content">
+                    <div class="pb-2">
+                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. A recusandae nobis ratione fugiat quae
+                        facere odio perspiciatis, ut quos voluptates!
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="heading">
+                    <i class="fas fa-sync-alt aside-icon"></i>
+                    Повернуть
+                </div>
+                <div class="content">
+                    <div class="pb-2">
+                        <button id="btn-rotate-left" type="button" class="btn btn-secondary">
+                            <i class="fas fa-undo-alt"></i>
+                        </button>
+                        <button id="btn-rotate-right" type="button" class="btn btn-secondary">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="heading">
+                    <i class="fas fa-compress aside-icon"></i>
+                    Изменить размер
+                </div>
+                <div class="content">
+                    <form>
+                        <div class="form-group">
+                            <input type="number" id="input-width">
+                            <input type="number" id="input-height">
+                        </div>
+                        <div class="form-group">
+                            <label for="formControlRange">Масштаб</label>
+                            <input id="input-scale" type="range" class="form-control-range" id="formControlRange"
+                                min="0" max="300" value="100" step="10">
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="heading">
+                    <i class="fas fa-palette aside-icon"></i>
+                    Цвета
+                </div>
+                <div class="content">
+                    <div class="pb-2">
+                        Content 3
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="heading">
+                    <i class="fas fa-chart-area aside-icon"></i>
+                    Резкость
+                </div>
+                <div class="content">
+                    <div class="pb-2">
+                        Text
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="heading">
+                    <i class="fas fa-filter aside-icon"></i>
+                    Фильтры
+                </div>
+                <div class="content">
+                    <div class="pb-2">
+                        <button id="grayscale" class="btn">
+                            Градация серого
+                        </button>
+                        <button id="negative" class="btn">
+                            Негатив
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="heading">
+                    <i class="fas fa-magic aside-icon"></i>
+                    Эффекты
+                </div>
+                <div class="content">
+                    <div class="pb-2">
+                        Text
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <div class="canvas-holder">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div class="canvas-bar">
+
+        </div>
+    </div>
+
+    <script src="./js/index.js"></script>
+    <script src="./js/accordion.js"></script>
+    <script>var myAccordion = new Accordion('.accordion-container');</script>
+</body>
+
+</html>
