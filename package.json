@@ -9,7 +9,6 @@
   "author": "Ilya D.",
   "license": "ISC",
   "dependencies": {
-    "gh-pages": "^2.2.0",
     "gulp": "^4.0.2",
     "gulp-sass": "^4.0.2"
   }
