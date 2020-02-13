@@ -31,21 +31,15 @@
                     </label>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link" href="#" id="btn-back">
                         <i class="icon icon-undo"></i>
                         Назад
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link" href="#" id="btn-forward">
                         <i class="icon icon-redo"></i>
                         Вперед
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="icon icon-original"></i>
-                        Оригинал
                     </a>
                 </li>
                 <li class="nav-item" id="btn-save">
@@ -78,7 +72,7 @@
                     Повернуть
                 </div>
                 <div class="content">
-                    <div class="pb-2">
+                    <div class="pb-2 pt-1">
                         <button id="btn-rotate-left" type="button" class="btn btn-secondary">
                             <i class="fas fa-undo-alt"></i>
                         </button>
@@ -135,11 +129,14 @@
                     Фильтры
                 </div>
                 <div class="content">
-                    <div class="pb-2">
-                        <button id="grayscale" class="btn">
+                    <div class="pb-2 pt-1">
+                        <button id="btn-filter-apply" type="button" class="btn btn-primary btn-sm btn-block">
+                            Применить
+                        </button>
+                        <button id="grayscale" class="btn btn-block btn-light btn-sm">
                             Градация серого
                         </button>
-                        <button id="negative" class="btn">
+                        <button id="negative" class="btn btn-block btn-light btn-sm">
                             Негатив
                         </button>
                     </div>
@@ -161,6 +158,14 @@
 
     <div class="canvas-container">
         <div class="canvas-holder">
+            <div class="toggle-image pt-2 pl-2">
+                <button id="get-current-image" class="btn btn-secondary btn-lg btn-toggle" title="Текущее изображение">
+                    <i class="fas fa-image"></i>
+                </button>
+                <button id="get-original-image" class="btn btn-secondary btn-lg btn-toggle" title="Оригинал">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
             <canvas id="canvas"></canvas>
         </div>
         <div class="canvas-bar">

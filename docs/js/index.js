@@ -1,58 +1,113 @@
 const btnSave = document.getElementById('btn-save');
 const btnLoad = document.getElementById('btn-load');
-const btnRotateRight = document.getElementById('btn-rotate-right');
-const btnRotateLeft = document.getElementById('btn-rotate-left');
+const btnBack = document.getElementById('btn-back');
+const btnForward = document.getElementById('btn-forward');
+const btnGetCurrentImage = document.getElementById('get-current-image');
+const btnGetOriginalImage = document.getElementById('get-original-image');
+const btnFilterApply = document.getElementById('btn-filter-apply');
 const grayscale = document.getElementById('grayscale');
 const negative = document.getElementById('negative');
-// const inputScale = document.getElementById('input-scale');
-// const inputWidth = document.getElementById('input-width');
-// const inputHeight = document.getElementById('input-height');
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+const tempImage = new Image();
 const originalImage = new Image();
 
-let currentRotate = 0;
+let historyChanges = [];
+let currentPositionInHistory = -1;
 
 
 btnLoad.addEventListener('change', loadImage, false);
 btnSave.addEventListener('click', saveImage, false);
+btnBack.addEventListener('click', () => {
+    if (historyChanges.length === 0) {
+        alert('Загрузите изображение!');
+        return;
+    }
+    if (currentPositionInHistory > 0) {
+        currentPositionInHistory--;
+        drawByPosition(currentPositionInHistory);
+    }
+}, false);
+btnForward.addEventListener('click', () => {
+    if (historyChanges.length === 0) {
+        alert('Загрузите изображение!');
+        return;
+    }
+    if (currentPositionInHistory < historyChanges.length - 1) {
+        currentPositionInHistory++;
+        drawByPosition(currentPositionInHistory);
+    }
+}, false);
+btnGetCurrentImage.addEventListener('click', () => {
+    if (historyChanges.length === 0) {
+        alert('Загрузите изображение!');
+        return;
+    }
+    currentPositionInHistory = historyChanges.length - 1;
+    drawByPosition(historyChanges.length - 1);
+}, false);
+btnGetOriginalImage.addEventListener('click', () => {
+    if (historyChanges.length === 0) {
+        alert('Загрузите изображение!');
+        return;
+    }
+    drawByPosition(0);
+}, false);
+btnFilterApply.addEventListener('click', applyChanges, false);
 grayscale.addEventListener('click', getGrayscale, false);
 negative.addEventListener('click', getNegative, false);
-btnRotateRight.addEventListener('click', () => {
-    currentRotate = currentRotate + 90;
-    rotate();
-}, false);
-btnRotateLeft.addEventListener('click', () => {
-    currentRotate = currentRotate - 90;
-    rotate();
-}, false);
 
 
 
-function draw() {
-    ctx.drawImage(originalImage, 0, 0);
+function applyChanges() {
+    tempImage.src = canvas.toDataURL("image/jpeg");
+    historyPush(tempImage.src);
 }
+
+function historyPush(src) {
+    historyChanges.push(src);
+    currentPositionInHistory = historyChanges.length - 2;
+    currentPositionInHistory++;
+}
+
+function deleteHistory() {
+    historyChanges.length = 0;
+    currentPositionInHistory = -1;
+}
+
+function drawByPosition(index) {
+    let image = new Image();
+    image.src = historyChanges[index];
+    ctx.drawImage(image, 0, 0);
+}
+
+
 
 function loadImage(e) {
     let reader = new FileReader();
     reader.onload = function (event) {
         let img = new Image();
         img.onload = function () {
-            canvas.setAttribute('style', 'height: auto; width: 100%');
-            currentRotate = 0;
             canvas.width = img.width;
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
         }
         img.src = event.target.result;
+        tempImage.src = event.target.result;
         originalImage.src = event.target.result;
+        deleteHistory();
+        historyPush(event.target.result);
     }
     reader.readAsDataURL(e.target.files[0]);
 }
 
 function saveImage() {
+    if (historyChanges.length === 0) {
+        alert('Загрузите изображение!');
+        return;
+    }
     let link = document.createElement("a");
     document.body.appendChild(link);
     link.href = canvas.toDataURL("image/jpeg");
@@ -60,29 +115,8 @@ function saveImage() {
     link.click();
 }
 
-function rotate() {
-    let image = new Image();
-    image.src = originalImage.src;
-
-    if (currentRotate % 180) {
-        canvas.setAttribute('style', 'height: 100%; width: auto');
-        canvas.width = image.height;
-        canvas.height = image.width;
-    } else {
-        canvas.setAttribute('style', 'width: 100%; height: auto');
-        canvas.width = image.width;
-        canvas.height = image.height;
-    }
-
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate(currentRotate * Math.PI / 180);
-    ctx.drawImage(image, -image.width / 2, -image.height / 2);
-    ctx.restore();
-}
-
 function getGrayscale() {
-    draw();
+    drawByPosition(currentPositionInHistory);
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
     for (let y = 0; y < imgPixels.height; y++) {
         for (let x = 0; x < imgPixels.width; x++) {
@@ -97,18 +131,15 @@ function getGrayscale() {
 }
 
 function getNegative() {
-    draw();
+    drawByPosition(currentPositionInHistory);
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < imgPixels.data.length; i += 4) {
         let r = imgPixels.data[i];
         let g = imgPixels.data[i + 1];
         let b = imgPixels.data[i + 2];
-        let invertedRed = 255 - r;
-        let invertedGreen = 255 - g;
-        let invertedBlue = 255 - b;
-        imgPixels.data[i] = invertedRed;
-        imgPixels.data[i + 1] = invertedGreen;
-        imgPixels.data[i + 2] = invertedBlue;
+        imgPixels.data[i] = 255 - r;
+        imgPixels.data[i + 1] = 255 - g;
+        imgPixels.data[i + 2] = 255 - b;
     }
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }

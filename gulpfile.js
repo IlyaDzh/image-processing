@@ -2,12 +2,12 @@ var gulp = require('gulp');
 var sass = require('gulp-sass');
 
 gulp.task('scss', function (done) {
-    gulp.src('./app/scss/*.scss')
+    gulp.src('./docs/scss/*.scss')
         .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
-        .pipe(gulp.dest('./app/css/'));
+        .pipe(gulp.dest('./docs/css/'));
     done();
 });
 
 gulp.task('watch', function () {
-    gulp.watch('./app/scss/*.scss', gulp.parallel('scss'));
+    gulp.watch('./docs/scss/*.scss', gulp.parallel('scss'));
 });

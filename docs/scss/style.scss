@@ -4,11 +4,6 @@ $bg-color: #1a1a20;
     background: $bg-color !important;
 }
 
-.btn-secondary {
-    background-color: #afafaf;
-    border-color: #afafaf;
-}
-
 .icon {
     display: block;
     opacity: 0.7;
@@ -27,10 +22,6 @@ $bg-color: #1a1a20;
 
     &-redo {
         background-position: -88px 0;
-    }
-
-    &-original {
-        background-position: -308px 0;
     }
 
     &-save {
@@ -55,7 +46,7 @@ $bg-color: #1a1a20;
 .aside {
     float: left;
     width: 250px;
-    height: 85vh;
+    height: calc(100vh - 56px);
 
     &-icon {
         font-size: 16px;
@@ -64,6 +55,7 @@ $bg-color: #1a1a20;
 }
 
 .accordion-container {
+    display: block;
     width: 100%;
     height: 100%;
     margin-top: 0;
@@ -71,6 +63,21 @@ $bg-color: #1a1a20;
     border-right: 1px solid #e3e3e3;
     border-bottom: 1px solid #e3e3e3;
     overflow: auto;
+}
+
+.toggle-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.btn-toggle {
+    padding: 0;
+    border-radius: 50%;
+    box-shadow: 0px 0px 12px 2px rgba(0, 0, 0, 0.3);
+    width: 49px;
+    height: 49px;
 }
 
 #canvas {
@@ -86,7 +93,7 @@ $bg-color: #1a1a20;
 .canvas-container {
     background-color: #efefef;
     margin-left: 250px;
-    height: 85vh;
+    height: calc(100vh - 56px);
 }
 
 .canvas-holder {
@@ -99,6 +106,11 @@ $bg-color: #1a1a20;
 @media (min-width: 576px) {
     .navbar {
         padding: 0 1rem;
+    }
+
+    .aside,
+    .canvas-container {
+        height: calc(100vh - 62px);
     }
 }
 
