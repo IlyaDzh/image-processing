@@ -9,6 +9,7 @@ const btnGetOriginalImage = document.getElementById('get-original-image');
 const brightness = document.getElementById('input-brightness');
 const contrast = document.getElementById('input-contrast');
 const grayscale = document.getElementById('grayscale');
+const sepia = document.getElementById('sepia');
 const negative = document.getElementById('negative');
 
 const canvas = document.getElementById('canvas');
@@ -59,6 +60,7 @@ btnGetOriginalImage.addEventListener('click', () => {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
         return;
     }
+    currentPositionInHistory = 0;
     drawByPosition(0);
 }, false);
 btnBrightContrastApply.addEventListener('click', () => {
@@ -68,6 +70,7 @@ btnBrightContrastApply.addEventListener('click', () => {
 brightness.addEventListener('input', () => setBrightness(Number(event.target.value)), false);
 contrast.addEventListener('input', () => setContrast(Number(event.target.value)), false);
 grayscale.addEventListener('click', imageToGrayscale, false);
+sepia.addEventListener('click', imageToSepia, false);
 negative.addEventListener('click', imageToNegative, false);
 
 
@@ -77,7 +80,7 @@ function applyChanges() {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
         return;
     }
-    tata.success('Успех', 'Изменения зафиксированы!', { duration: 1500 })
+    tata.success('Успех', 'Изменения зафиксированы!', { duration: 1700 })
     tempImage.src = canvas.toDataURL("image/jpeg");
     historyPush(tempImage.src);
 }
@@ -159,14 +162,25 @@ function setContrast(contrastMul) {
 function imageToGrayscale() {
     drawByPosition(currentPositionInHistory);
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    for (let y = 0; y < imgPixels.height; y++) {
-        for (let x = 0; x < imgPixels.width; x++) {
-            let i = (y * 4) * imgPixels.width + x * 4;
-            let avg = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
-            imgPixels.data[i] = avg;
-            imgPixels.data[i + 1] = avg;
-            imgPixels.data[i + 2] = avg;
-        }
+    for (let i = 0; i < imgPixels.data.length; i += 4) {
+        let avg = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
+        imgPixels.data[i] = avg;
+        imgPixels.data[i + 1] = avg;
+        imgPixels.data[i + 2] = avg;
+    }
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+}
+
+function imageToSepia() {
+    drawByPosition(currentPositionInHistory);
+    let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < imgPixels.data.length; i += 4) {
+        var r = imgPixels.data[i];
+        var g = imgPixels.data[i + 1];
+        var b = imgPixels.data[i + 2];
+        imgPixels.data[i] = (r * 0.393) + (g * 0.769) + (b * 0.189);
+        imgPixels.data[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
+        imgPixels.data[i + 2] = (r * 0.272) + (g * 0.534) + (b * 0.131);
     }
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
@@ -175,12 +189,9 @@ function imageToNegative() {
     drawByPosition(currentPositionInHistory);
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < imgPixels.data.length; i += 4) {
-        let r = imgPixels.data[i];
-        let g = imgPixels.data[i + 1];
-        let b = imgPixels.data[i + 2];
-        imgPixels.data[i] = 255 - r;
-        imgPixels.data[i + 1] = 255 - g;
-        imgPixels.data[i + 2] = 255 - b;
+        imgPixels.data[i] = 255 - imgPixels.data[i];
+        imgPixels.data[i + 1] = 255 - imgPixels.data[i + 1];
+        imgPixels.data[i + 2] = 255 - imgPixels.data[i + 2];
     }
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
