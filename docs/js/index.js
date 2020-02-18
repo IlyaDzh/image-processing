@@ -4,6 +4,7 @@ const btnSave = document.getElementById('btn-save');
 const btnLoad = document.getElementById('btn-load');
 const btnBack = document.getElementById('btn-back');
 const btnForward = document.getElementById('btn-forward');
+const btnInfo = document.getElementById('btn-info');
 const btnGetCurrentImage = document.getElementById('get-current-image');
 const btnGetOriginalImage = document.getElementById('get-original-image');
 const brightness = document.getElementById('input-brightness');
@@ -12,11 +13,18 @@ const grayscale = document.getElementById('grayscale');
 const sepia = document.getElementById('sepia');
 const negative = document.getElementById('negative');
 
+const colorPick1 = document.getElementById('colorPick1');
+const colorPick2 = document.getElementById('colorPick2');
+const bin = document.getElementById('input-bin');
+const swapColors = document.getElementById('swap-colors');
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 const tempImage = new Image();
 const originalImage = new Image();
+
+let name, type, size, resolution;
 
 let historyChanges = [];
 let currentPositionInHistory = -1;
@@ -27,6 +35,21 @@ for (let i = 0; i < btnApply.length; i++) {
 
 btnLoad.addEventListener('change', loadImage, false);
 btnSave.addEventListener('click', saveImage, false);
+btnInfo.addEventListener('click', () => {
+    if (historyChanges.length === 0) {
+        tata.error('Ошибка', 'Необходимо загрузить картинку!');
+        return;
+    }
+    Modal.alert({
+        title: '<h5 style="margin-bottom: 0">Информация</h5>',
+        message: `
+            <p><b>Имя файла:</b> ${name}</p>
+            <p><b>Тип файла:</b> ${type}</p>
+            <p><b>Размер:</b> ${size} байт</p>
+            <p><b>Разрешение:</b> ${resolution.width}x${resolution.height}</p>
+        `
+    });
+}, false);
 btnBack.addEventListener('click', () => {
     if (historyChanges.length === 0) {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
@@ -69,9 +92,15 @@ btnBrightContrastApply.addEventListener('click', () => {
 }, false);
 brightness.addEventListener('input', () => setBrightness(Number(event.target.value)), false);
 contrast.addEventListener('input', () => setContrast(Number(event.target.value)), false);
+bin.addEventListener('input', () => imageToBin(Number(event.target.value), hexToRgb(colorPick1.value), hexToRgb(colorPick2.value)), false);
 grayscale.addEventListener('click', imageToGrayscale, false);
 sepia.addEventListener('click', imageToSepia, false);
 negative.addEventListener('click', imageToNegative, false);
+swapColors.addEventListener('click', () => {
+    let temp = colorPick1.value;
+    colorPick1.value = colorPick2.value;
+    colorPick2.value = temp;
+}, false);
 
 
 
@@ -95,12 +124,21 @@ function clearVariables() {
     currentPositionInHistory = -1;
     brightness.value = 0;
     contrast.value = 0;
+    bin.value = 128;
 }
 
 function drawByPosition(index) {
     let image = new Image();
     image.src = historyChanges[index];
     ctx.drawImage(image, 0, 0);
+}
+
+function hexToRgb(hex) {
+    let rgb = hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
+        , (m, r, g, b) => '#' + r + r + g + g + b + b)
+        .substring(1).match(/.{2}/g)
+        .map(x => parseInt(x, 16))
+    return { r: rgb[0], g: rgb[1], b: rgb[2] };
 }
 
 
@@ -112,6 +150,10 @@ function loadImage(e) {
         img.onload = function () {
             canvas.width = img.width;
             canvas.height = img.height;
+            resolution = {
+                'width': img.width,
+                'height': img.height
+            }
             ctx.drawImage(img, 0, 0);
         }
         img.src = event.target.result;
@@ -120,6 +162,9 @@ function loadImage(e) {
         clearVariables();
         historyPush(event.target.result);
     }
+    name = e.target.files[0].name;
+    size = e.target.files[0].size;
+    type = e.target.files[0].type.substr(e.target.files[0].type.lastIndexOf('/') + 1);
     reader.readAsDataURL(e.target.files[0]);
 }
 
@@ -192,6 +237,18 @@ function imageToNegative() {
         imgPixels.data[i] = 255 - imgPixels.data[i];
         imgPixels.data[i + 1] = 255 - imgPixels.data[i + 1];
         imgPixels.data[i + 2] = 255 - imgPixels.data[i + 2];
+    }
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+}
+
+function imageToBin(binMul, color1, color2) {
+    drawByPosition(currentPositionInHistory);
+    let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < imgPixels.data.length; i += 4) {
+        let v = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
+        imgPixels.data[i] = v > binMul ? color1.r : color2.r;
+        imgPixels.data[i + 1] = v > binMul ? color1.g : color2.g;
+        imgPixels.data[i + 2] = v > binMul ? color1.b : color2.b;
     }
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }

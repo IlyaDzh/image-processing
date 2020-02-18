@@ -7,6 +7,7 @@
     <title>Photoshop</title>
     <link rel="stylesheet" href="./css/bootstrap.min.css">
     <link rel="stylesheet" href="./css/accordion.min.css">
+    <link rel="stylesheet" href="./css/modal.css">
     <link rel="stylesheet" href="./css/style.css">
     <script src="https://kit.fontawesome.com/bbd0f0ce77.js" crossorigin="anonymous"></script>
 </head>
@@ -40,6 +41,12 @@
                     <a class="nav-link" href="#" id="btn-forward">
                         <i class="icon icon-redo"></i>
                         Вперед
+                    </a>
+                </li>
+                <li class="nav-item" id="btn-info">
+                    <a class="nav-link" href="#">
+                        <i class="icon icon-info"></i>
+                        О файле
                     </a>
                 </li>
                 <li class="nav-item" id="btn-save">
@@ -98,7 +105,18 @@
                 </div>
                 <div class="content">
                     <div class="pb-2">
-                        Content 4
+                        <div class="colors-wrapper mb-3">
+                            <input id="colorPick1" type="color" value="#000000">
+                            <button class="btn" id="swap-colors"><i class="fas fa-exchange-alt"
+                                    style="font-size: 22px;"></i></button>
+                            <input id="colorPick2" type="color" value="#ffffff">
+                        </div>
+                        <input id="input-bin" type="range" class="form-control-range slider" min="1" max="255"
+                            value="128" step="1">
+                        <button id="btn-apply" type="button"
+                            class="btn-apply btn btn-primary btn-sm btn-block mb-2 mt-3">
+                            Применить
+                        </button>
                     </div>
                 </div>
             </div>
@@ -181,10 +199,10 @@
     <div class="canvas-container">
         <div class="canvas-holder">
             <div class="toggle-image pt-2 pl-2">
-                <button id="get-current-image" class="btn btn-secondary btn-lg btn-toggle" title="Текущее изображение">
+                <button id="get-current-image" class="btn btn-lg btn-toggle" title="Текущее изображение">
                     <i class="fas fa-image"></i>
                 </button>
-                <button id="get-original-image" class="btn btn-secondary btn-lg btn-toggle" title="Оригинал">
+                <button id="get-original-image" class="btn btn-lg btn-toggle" title="Оригинал">
                     <i class="fas fa-eye"></i>
                 </button>
             </div>
@@ -195,13 +213,15 @@
         </div>
     </div>
 
+
+    <script src="./js/modal.js"></script>
     <script src="./js/index.js"></script>
     <script src="./js/accordion.js"></script>
     <script src="./js/tata.js"></script>
-    <script>var myAccordion = new Accordion('.accordion-container');</script>
+    <script>const myAccordion = new Accordion('.accordion-container');</script>
     <script>
         tata.info('Добро пожаловать', 'Нажмите чтобы загрузить картинку!', {
-            duration: 6000,
+            duration: 5000,
             onClick: () => btnLoad.click()
         });
     </script>
