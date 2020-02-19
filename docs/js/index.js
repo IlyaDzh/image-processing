@@ -7,6 +7,7 @@ const btnForward = document.getElementById('btn-forward');
 const btnInfo = document.getElementById('btn-info');
 const btnGetCurrentImage = document.getElementById('get-current-image');
 const btnGetOriginalImage = document.getElementById('get-original-image');
+
 const brightness = document.getElementById('input-brightness');
 const contrast = document.getElementById('input-contrast');
 const grayscale = document.getElementById('grayscale');
@@ -45,7 +46,7 @@ btnInfo.addEventListener('click', () => {
         message: `
             <p><b>Имя файла:</b> ${name}</p>
             <p><b>Тип файла:</b> ${type}</p>
-            <p><b>Размер:</b> ${size} байт</p>
+            <p><b>Размер:</b> ${Math.round(size / 1024)} КБ (${size} байт)</p>
             <p><b>Разрешение:</b> ${resolution.width}x${resolution.height}</p>
         `
     });
@@ -86,9 +87,15 @@ btnGetOriginalImage.addEventListener('click', () => {
     currentPositionInHistory = 0;
     drawByPosition(0);
 }, false);
+
 btnBrightContrastApply.addEventListener('click', () => {
     brightness.value = 0;
     contrast.value = 0;
+}, false);
+swapColors.addEventListener('click', () => {
+    let temp = colorPick1.value;
+    colorPick1.value = colorPick2.value;
+    colorPick2.value = temp;
 }, false);
 brightness.addEventListener('input', () => setBrightness(Number(event.target.value)), false);
 contrast.addEventListener('input', () => setContrast(Number(event.target.value)), false);
@@ -96,11 +103,6 @@ bin.addEventListener('input', () => imageToBin(Number(event.target.value), hexTo
 grayscale.addEventListener('click', imageToGrayscale, false);
 sepia.addEventListener('click', imageToSepia, false);
 negative.addEventListener('click', imageToNegative, false);
-swapColors.addEventListener('click', () => {
-    let temp = colorPick1.value;
-    colorPick1.value = colorPick2.value;
-    colorPick2.value = temp;
-}, false);
 
 
 

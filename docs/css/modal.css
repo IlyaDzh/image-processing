@@ -93,6 +93,8 @@
   .modal.fadeOut {
     -webkit-animation: fadeOut 0.2s forwards;
     animation: fadeOut 0.2s forwards; }
+    .modal-message p:last-child {
+        margin-bottom: 0; }
 
 @-webkit-keyframes fadeIn {
   from {

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photoshop</title>
+    <link rel="icon" href="./img/photoshop.png" type="image/png">
     <link rel="stylesheet" href="./css/bootstrap.min.css">
     <link rel="stylesheet" href="./css/accordion.min.css">
     <link rel="stylesheet" href="./css/modal.css">
@@ -28,7 +29,7 @@
                     <label for="btn-load" class="nav-link mb-0" style="cursor: pointer">
                         <i class="icon icon-open"></i>
                         Открыть
-                        <input id="btn-load" type="file" style="display: none;">
+                        <input id="btn-load" type="file" style="display: none;" accept=".jpg, .jpeg, .png, .bmp">
                     </label>
                 </li>
                 <li class="nav-item">
@@ -208,14 +209,13 @@
             </div>
             <canvas id="canvas"></canvas>
         </div>
-        <div class="canvas-bar">
-
-        </div>
+        <div class="coord-bar"></div>
     </div>
 
 
     <script src="./js/modal.js"></script>
     <script src="./js/index.js"></script>
+    <script src="./js/coordinate.js"></script>
     <script src="./js/accordion.js"></script>
     <script src="./js/tata.js"></script>
     <script>const myAccordion = new Accordion('.accordion-container');</script>

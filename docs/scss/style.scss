@@ -80,7 +80,7 @@ input[type="color"] {
     padding: 0;
     height: 38px;
     width: 38px;
-    border: 1px solid #000;
+    border: 2px solid #000;
     border-radius: 50%;
     outline: 0;
 
@@ -166,7 +166,7 @@ input[type="color"] {
 .canvas-container {
     background-color: #efefef;
     margin-left: 250px;
-    height: calc(100vh - 56px);
+    height: calc(100vh - 81px);
 }
 
 .canvas-holder {
@@ -176,14 +176,26 @@ input[type="color"] {
     overflow: hidden;
 }
 
+.coord-bar {
+    background-color: #fff;
+    color: #000;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 1px 0 1px 13px;
+    border-top: 1px solid #e3e3e3;
+}
+
 @media (min-width: 576px) {
     .navbar {
         padding: 0 1rem;
     }
 
-    .aside,
-    .canvas-container {
+    .aside {
         height: calc(100vh - 62px);
+    }
+
+    .canvas-container {
+        height: calc(100vh - 87px);
     }
 }
 
