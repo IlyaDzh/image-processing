@@ -4,6 +4,7 @@ var Modal = (function() {
     var defaults = {
       title: 'Notification', // modal title
       message: '', // modal message
+      graphics: false,
       autoOpen: true, // show modal when declared
       closeOnEscape: true, // close when escape key pressed
       closeOnBlur: true, // close when overlay is clicked
@@ -47,6 +48,7 @@ var Modal = (function() {
   function buildModal(type, options) {
     var modal = document.createElement('div');
     modal.className = 'modal';
+    if (options.graphics) modal.className += " modal-graph";
 
     if (options.closeOnBlur) modal.setAttribute('data-action', 'close');
 
@@ -125,6 +127,7 @@ var Modal = (function() {
     // reset to fadeIn animation on open
     if (this.options.animated) {
       this.modal.className = 'modal fadeIn';
+      if (this.options.graphics) this.modal.className += " modal-graph";
     }
 
     // append modal to the body
@@ -146,6 +149,7 @@ var Modal = (function() {
     if (this.options.animated) {
       this.modal.addEventListener('animationend', this);
       this.modal.className = 'modal fadeOut';
+      if (this.options.graphics) this.modal.className += " modal-graph";
     } else {
       document.body.removeChild(this.modal);
       this.options.onClose();

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 
 <head>
@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="./css/accordion.min.css">
     <link rel="stylesheet" href="./css/modal.css">
     <link rel="stylesheet" href="./css/style.css">
-    <script src="https://kit.fontawesome.com/bbd0f0ce77.js" crossorigin="anonymous"></script>
+    <!-- <script src="https://kit.fontawesome.com/bbd0f0ce77.js" crossorigin="anonymous"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.min.js"></script> -->
 </head>
 
 <body>
@@ -61,6 +62,12 @@
     </nav>
 
     <div class="aside">
+        <button id="btn-apply" type="button" class="btn btn-primary btn-block rounded-0" style="font-weight: 500">
+            Применить
+        </button>
+        <button id="btn-reset" type="button" class="btn btn-danger btn-block rounded-0 m-0" style="font-weight: 500">
+            Сбросить
+        </button>
         <div class="accordion-container">
             <div class="panel">
                 <div class="heading">
@@ -75,28 +82,29 @@
             </div>
             <div class="panel">
                 <div class="heading">
-                    <i class="fas fa-sync-alt aside-icon"></i>
-                    Повернуть
+                    <i class="fas fa-compress aside-icon"></i>
+                    Изменить размер
                 </div>
                 <div class="content">
                     <div class="pb-2">
-                        <!-- <button id="btn-rotate-left" type="button" class="btn btn-secondary">
-                            <i class="fas fa-undo-alt"></i>
-                        </button>
-                        <button id="btn-rotate-right" type="button" class="btn btn-secondary">
-                            <i class="fas fa-redo-alt"></i>
-                        </button> -->
                         Content 2
                     </div>
                 </div>
             </div>
             <div class="panel">
                 <div class="heading">
-                    <i class="fas fa-compress aside-icon"></i>
-                    Изменить размер
+                    <i class="fas fa-graph-alt aside-icon"></i>
+                    Графики
                 </div>
                 <div class="content">
-                    Content 3
+                    <div class="pb-2 pt-1">
+                        <button id="histogram" class="btn btn-block btn-info btn-sm">
+                            Гистограммы
+                        </button>
+                        <button id="profile" class="btn btn-block btn-info btn-sm">
+                            Профиль яркости
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="panel">
@@ -105,7 +113,7 @@
                     Цвета
                 </div>
                 <div class="content">
-                    <div class="pb-2">
+                    <div class="pb-3">
                         <div class="colors-wrapper mb-3">
                             <input id="colorPick1" type="color" value="#000000">
                             <button class="btn" id="swap-colors"><i class="fas fa-exchange-alt"
@@ -114,10 +122,6 @@
                         </div>
                         <input id="input-bin" type="range" class="form-control-range slider" min="1" max="255"
                             value="128" step="1">
-                        <button id="btn-apply" type="button"
-                            class="btn-apply btn btn-primary btn-sm btn-block mb-2 mt-3">
-                            Применить
-                        </button>
                     </div>
                 </div>
             </div>
@@ -127,21 +131,15 @@
                     Яркость/Контрастность
                 </div>
                 <div class="content">
-                    <div class="pb-2">
-                        <div class="mb-2">
-                            <label for="input-brightness">Яркость</label>
-                            <input id="input-brightness" type="range" class="form-control-range slider" min="-150"
-                                max="150" value="0" step="1">
-                        </div>
-                        <div class="mb-3">
-                            <label for="input-contrast">Контрастность</label>
-                            <input id="input-contrast" type="range" class="form-control-range slider" min="-100"
-                                max="100" value="0" step="1">
-                        </div>
-                        <button id="btn-bright_contrast-apply" type="button"
-                            class="btn-apply btn btn-primary btn-sm btn-block mb-2 mt-1">
-                            Применить
-                        </button>
+                    <div class="mb-2">
+                        <label for="input-brightness">Яркость</label>
+                        <input id="input-brightness" type="range" class="form-control-range slider" min="-150" max="150"
+                            value="0" step="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="input-contrast">Контрастность</label>
+                        <input id="input-contrast" type="range" class="form-control-range slider" min="-100" max="100"
+                            value="0" step="1">
                     </div>
                 </div>
             </div>
@@ -151,13 +149,9 @@
                     Резкость
                 </div>
                 <div class="content">
-                    <div class="pb-2 pt-2">
+                    <div class="pt-2">
                         <input id="input-scale" type="range" class="form-control-range slider mb-3" min="0" max="200"
                             value="100" step="10">
-                        <button id="btn-sharp-apply" type="button"
-                            class="btn-apply btn btn-primary btn-sm btn-block mb-2 mt-1">
-                            Применить
-                        </button>
                     </div>
                 </div>
             </div>
@@ -168,16 +162,13 @@
                 </div>
                 <div class="content">
                     <div class="pb-2 pt-1">
-                        <button type="button" class="btn-apply btn btn-primary btn-sm btn-block">
-                            Применить
+                        <button id="grayscale" class="btn btn-block btn-info btn-sm">
+                            Оттенки серого
                         </button>
-                        <button id="grayscale" class="btn btn-block btn-light btn-sm">
-                            Градация серого
-                        </button>
-                        <button id="sepia" class="btn btn-block btn-light btn-sm">
+                        <button id="sepia" class="btn btn-block btn-info btn-sm">
                             Сепия
                         </button>
-                        <button id="negative" class="btn btn-block btn-light btn-sm">
+                        <button id="negative" class="btn btn-block btn-info btn-sm">
                             Негатив
                         </button>
                     </div>
@@ -213,8 +204,10 @@
     </div>
 
 
+    <script src="./js/d3.min.js"></script>
     <script src="./js/modal.js"></script>
     <script src="./js/index.js"></script>
+    <script src="./js/historgam.js"></script>
     <script src="./js/coordinate.js"></script>
     <script src="./js/accordion.js"></script>
     <script src="./js/tata.js"></script>

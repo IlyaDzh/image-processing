@@ -1,5 +1,5 @@
-const btnApply = document.getElementsByClassName('btn-apply');
-const btnBrightContrastApply = document.getElementById('btn-bright_contrast-apply');
+const btnApply = document.getElementById('btn-apply');
+const btnReset = document.getElementById('btn-reset');
 const btnSave = document.getElementById('btn-save');
 const btnLoad = document.getElementById('btn-load');
 const btnBack = document.getElementById('btn-back');
@@ -30,10 +30,18 @@ let name, type, size, resolution;
 let historyChanges = [];
 let currentPositionInHistory = -1;
 
-for (let i = 0; i < btnApply.length; i++) {
-    btnApply[i].addEventListener('click', applyChanges, false);
-}
 
+btnApply.addEventListener('click', applyChanges, false);
+btnReset.addEventListener('click', () => { 
+    if (historyChanges.length === 0) {
+        tata.error('Ошибка', 'Необходимо загрузить картинку!');
+        return;
+    }
+    drawByPosition(historyChanges.length - 1);
+    brightness.value = 0;
+    contrast.value = 0;
+    bin.value = 128;
+}, false);
 btnLoad.addEventListener('change', loadImage, false);
 btnSave.addEventListener('click', saveImage, false);
 btnInfo.addEventListener('click', () => {
@@ -86,11 +94,6 @@ btnGetOriginalImage.addEventListener('click', () => {
     }
     currentPositionInHistory = 0;
     drawByPosition(0);
-}, false);
-
-btnBrightContrastApply.addEventListener('click', () => {
-    brightness.value = 0;
-    contrast.value = 0;
 }, false);
 swapColors.addEventListener('click', () => {
     let temp = colorPick1.value;
