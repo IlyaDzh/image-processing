@@ -13,6 +13,10 @@
     width: 850px !important;
 }
 
+.modal-profile .modal-box {
+    width: 1000px !important;
+}
+
 .modal-message p {
     overflow: hidden;
 }

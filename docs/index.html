@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photoshop</title>
     <link rel="icon" href="./img/photoshop.png" type="image/png">
-    <link rel="stylesheet" href="./css/bootstrap.min.css">
-    <link rel="stylesheet" href="./css/accordion.min.css">
-    <link rel="stylesheet" href="./css/modal.css">
+    <link rel="stylesheet" href="./css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/lib/accordion.min.css">
+    <link rel="stylesheet" href="./css/lib/modal.css">
     <link rel="stylesheet" href="./css/style.css">
     <script src="https://kit.fontawesome.com/bbd0f0ce77.js" crossorigin="anonymous"></script>
 </head>
@@ -92,7 +92,7 @@
             </div>
             <div class="panel">
                 <div class="heading">
-                    <i class="fas fa-graph-alt aside-icon"></i>
+                    <i class="fas fa-chart-bar aside-icon"></i>
                     Графики
                 </div>
                 <div class="content">
@@ -144,7 +144,7 @@
             </div>
             <div class="panel">
                 <div class="heading">
-                    <i class="fas fa-chart-area aside-icon"></i>
+                    <i class="fas fa-icicles fa-rotate-180 aside-icon"></i>
                     Резкость
                 </div>
                 <div class="content">
@@ -199,17 +199,17 @@
             </div>
             <canvas id="canvas"></canvas>
         </div>
-        <div class="coord-bar"></div>
+        <div id="coord-bar"></div>
     </div>
 
 
-    <script src="./js/d3.min.js"></script>
-    <script src="./js/modal.js"></script>
+    <script src="./js/lib/modal.js"></script>
     <script src="./js/index.js"></script>
+    <script src="./js/lib/apexcharts.min.js"></script>
     <script src="./js/historgam.js"></script>
     <script src="./js/coordinate.js"></script>
-    <script src="./js/accordion.js"></script>
-    <script src="./js/tata.js"></script>
+    <script src="./js/lib/tata.js"></script>
+    <script src="./js/lib/accordion.js"></script>
     <script>const myAccordion = new Accordion('.accordion-container');</script>
     <script>
         tata.info('Добро пожаловать', 'Нажмите чтобы загрузить картинку!', {

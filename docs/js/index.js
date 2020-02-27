@@ -114,6 +114,9 @@ function applyChanges() {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
         return;
     }
+    brightness.value = 0;
+    contrast.value = 0;
+    bin.value = 128;
     tata.success('Успех', 'Изменения зафиксированы!', { duration: 1700 })
     tempImage.src = canvas.toDataURL("image/jpeg");
     historyPush(tempImage.src);

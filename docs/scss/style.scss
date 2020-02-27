@@ -175,12 +175,11 @@ input[type="color"] {
     overflow: hidden;
 }
 
-.coord-bar {
+#coord-bar {
     background-color: #fff;
     color: #000;
     font-size: 15px;
-    font-weight: 500;
-    padding: 1px 0 1px 13px;
+    padding: 0 13px;
     border-top: 1px solid #e3e3e3;
 }
 

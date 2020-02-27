@@ -1,8 +1,7 @@
 const histogramBtn = document.getElementById('histogram');
 const profileBtn = document.getElementById('profile');
 
-let activeColor = 'red';
-let yAxis = false;
+let xClick, yClick;
 
 histogramBtn.addEventListener('click', () => {
     if (historyChanges.length === 0) {
@@ -18,114 +17,176 @@ profileBtn.addEventListener('click', () => {
     }
     getProfile();
 }, false);
+canvas.addEventListener('click', (e) => {
+    let mul = canvas.height / canvas.offsetHeight;
+    let rect = canvas.getBoundingClientRect();
+    xClick = Math.round((e.clientX - rect.left) * mul);
+    yClick = Math.round((e.clientY - rect.top) * mul);
+}, false);
+
+
 
 function getHistogram() {
     Modal.alert({
         title: '<h5 style="margin-bottom: 0">Гистограмма по яркости и трем цветовым каналам</h5>',
-        message: `
-            <div class="row">
-                <button id="red" class="focuser btn btn-info mr-1 btn-sm">R</button>
-                <button id="green" class="focuser btn btn-info mr-1 btn-sm">G</button>
-                <button id="blue" class="focuser btn btn-info mr-1 btn-sm">B</button>
-                <button id="sum" class="focuser btn btn-info mr-1 btn-sm">Sum</button>
-                <button id="blend" class="focuser btn btn-info btn-sm">All</button>
-            </div>
-            <div class="row"><svg width="1" height="1"></svg></div>
-        `,
+        message: '<div id="graphics-container"></div>',
         graphics: true
     });
-    calcAndGraph();
-    document.querySelectorAll("button.focuser").forEach(button => {
-        button.addEventListener("click", amplify);
-    });
+    calcAndHist();
 }
+
+function calcAndHist() {
+    let r = [], g = [], b = [], pixelSum = [];
+    const iD = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    for (let i = 0; i < 256; i++) { r[i] = 0; g[i] = 0; b[i] = 0; pixelSum[i] = 0; }
+    for (let i = 0; i < iD.length; i += 4) {
+        pixelSum[Math.round((iD[i] + iD[i + 1] + iD[i + 2]) / 3)]++;
+        r[iD[i]]++;
+        g[iD[i + 1]]++;
+        b[iD[i + 2]]++;
+    }
+    drawHistogram(pixelSum, r, g, b);
+}
+
+function drawHistogram(pixelSum, r, g, b) {
+    let options = {
+        series: [
+            { name: 'Red', data: r },
+            { name: 'Green', data: g },
+            { name: 'Blue', data: b },
+            { name: 'RGB', data: pixelSum }
+        ],
+        chart: {
+            zoom: false,
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                tools: {
+                    pan: false
+                }
+            },
+            animations: {
+                speed: 300,
+            }
+        },
+        legend: {
+            fontSize: '15px',
+            horizontalAlign: 'left',
+            position: 'top',
+            offsetX: 4
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2
+        },
+        colors: ['#dc3545', '#28a745', '#007bff', '#000000'],
+        yaxis: {
+            title: {
+                text: 'Количество пикселей',
+                style: {
+                    fontSize: '16px'
+                }
+            }
+        },
+        xaxis: {
+            title: {
+                text: 'Значение пикселя',
+                style: {
+                    fontSize: '16px'
+                }
+            },
+            min: 0,
+            max: 255
+        }
+    };
+    let chart = new ApexCharts(document.getElementById("graphics-container"), options);
+    chart.render();
+}
+
+
 
 function getProfile() {
-
+    Modal.alert({
+        title: '<h5 style="margin-bottom: 0">Профиль яркости по трем цветовым каналам</h5>',
+        message: '<div id="profile-container"></div>',
+        profile: true
+    });
+    calcAndProfile();
 }
 
-function amplify(e) {
-    const colors = ['red', 'green', 'blue', 'sum'];
-    const boost = e.target.id;
-    if (boost == 'blend') {
-        document.querySelectorAll('rect').forEach(bar => {
-            bar.style.opacity = 0.7;
-        });
-    }
-    else {
-        activeColor = boost;
-        const deaden = colors.filter(e => e !== boost);
-        document.querySelectorAll('.bar-' + boost).forEach(bar => {
-            bar.style.opacity = 1.0;
-        });
-        deaden.forEach(color => {
-            document.querySelectorAll('.bar-' + color).forEach(bar => {
-                bar.style.opacity = 0.2;
-            });
-        });
-    }
-}
-
-function histogram(data) {
-    let W = 800
-    let H = W / 1.8;
-    const svg = d3.select('svg');
-    const margin = { top: 20, right: 20, bottom: 30, left: 50 };
-    const width = W - margin.left - margin.right;
-    const height = H - margin.top - margin.bottom;
-    let q = document.querySelector('svg');
-    q.style.width = W;
-    q.style.height = H;
-    if (yAxis) { d3.selectAll("g.y-axis").remove(); yAxis = false; }
-
-    function graphComponent(dataC, color) {
-        d3.selectAll(".bar-" + color).remove();
-        let data = Object.keys(dataC).map(function (key) { return { freq: dataC[key], idx: +key } });
-        let x = d3.scaleLinear()
-            .range([0, width])
-            .domain([0, d3.max(data, function (d) { return d.idx; })]);
-        let y = d3.scaleLinear()
-            .range([height, 0])
-            .domain([0, d3.max(data, function (d) { return d.freq; })]);
-        let g = svg.append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        if (!yAxis) {
-            yAxis = true;
-            g.append("g")
-                .attr("class", "y-axis")
-                .attr("transform", "translate(" + -2 + ",0)")
-                .call(d3.axisLeft(y).ticks(10).tickSizeInner(10).tickSizeOuter(2));
-        }
-        g.selectAll(".bar-" + color)
-            .data(data)
-            .enter().append("rect")
-            .attr("class", "bar-" + color)
-            .attr("fill", color)
-            .attr("x", function (d) { return x(d.idx); })
-            .attr("y", function (d) { return y(d.freq); })
-            .attr("width", 2)
-            .attr("opacity", 0.8)
-            .attr("height", function (d) { return height - y(d.freq); })
-    }
-
-    graphComponent(data.rD, "red");
-    graphComponent(data.gD, "green");
-    graphComponent(data.bD, "blue");
-    graphComponent(data.pixelSum, "sum");
-}
-
-function calcAndGraph() {
-    let rD = {}, gD = {}, bD = {};
-    let pixelSum = {};
-    const iD = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    for (let i = 0; i < 256; i++) { rD[i] = 0; gD[i] = 0; bD[i] = 0; }
-    for (let i = 0; i <= 765; i++) { pixelSum[i] = 0; }
+function calcAndProfile() {
+    let r = [], g = [], b = [];
+    const iD = ctx.getImageData(0, yClick, canvas.width, 1).data;
     for (let i = 0; i < iD.length; i += 4) {
-        // pixelSum[Math.round(0.3 * iD[i] + 0.59 * iD[i + 1] + 0.1 * iD[i + 2])]++;
-        pixelSum[iD[i] + iD[i + 1] + iD[i + 2]]++;
-        rD[iD[i]]++;
-        gD[iD[i + 1]]++;
-        bD[iD[i + 2]]++;
+        r.push(iD[i]);
+        g.push(iD[i + 1]);
+        b.push(iD[i + 2]);
     }
-    histogram({ pixelSum, rD, gD, bD });
+    drawProfile(r, g, b);
+    ctx.fillRect(0, yClick, canvas.width, 5);
+}
+
+function drawProfile(r, g, b) {
+    let options = {
+        series: [
+            { name: "Red", data: r },
+            { name: "Green", data: g },
+            { name: 'Blue', data: b }
+        ],
+        chart: {
+            height: 350,
+            type: 'line',
+            animations: {
+                enabled: false
+            },
+            toolbar: {
+                tools: {
+                    pan: false
+                }
+            }
+        },
+        legend: {
+            fontSize: '16px',
+            horizontalAlign: 'left',
+            position: 'top',
+            offsetX: 4
+        },
+        stroke: {
+            curve: 'straight',
+            lineCap: 'butt'
+        },
+        colors: ['#dc3545', '#28a745', '#007bff'],
+        yaxis: {
+            title: {
+                text: 'Яркость',
+                style: {
+                    fontSize: '16px'
+                },
+            },
+            min: 0,
+            max: 255
+        },
+        xaxis: {
+            type: 'numeric',
+            labels: {
+                show: true
+            },
+            title: {
+                text: 'Ширина',
+                style: {
+                    fontSize: '16px'
+                },
+            },
+            min: 0,
+            max: canvas.width
+        },
+        grid: {
+            borderColor: '#f1f1f1',
+        }
+    };
+    let chart = new ApexCharts(document.getElementById("profile-container"), options);
+    chart.render();
 }

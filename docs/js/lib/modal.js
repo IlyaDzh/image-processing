@@ -5,6 +5,7 @@ var Modal = (function() {
       title: 'Notification', // modal title
       message: '', // modal message
       graphics: false,
+      profile: false,
       autoOpen: true, // show modal when declared
       closeOnEscape: true, // close when escape key pressed
       closeOnBlur: true, // close when overlay is clicked
@@ -49,6 +50,7 @@ var Modal = (function() {
     var modal = document.createElement('div');
     modal.className = 'modal';
     if (options.graphics) modal.className += " modal-graph";
+    if (options.profile) modal.className += " modal-profile";
 
     if (options.closeOnBlur) modal.setAttribute('data-action', 'close');
 
@@ -128,6 +130,7 @@ var Modal = (function() {
     if (this.options.animated) {
       this.modal.className = 'modal fadeIn';
       if (this.options.graphics) this.modal.className += " modal-graph";
+      if (this.options.profile) this.modal.className += " modal-profile";
     }
 
     // append modal to the body
@@ -150,6 +153,7 @@ var Modal = (function() {
       this.modal.addEventListener('animationend', this);
       this.modal.className = 'modal fadeOut';
       if (this.options.graphics) this.modal.className += " modal-graph";
+      if (this.options.profile) this.modal.className += " modal-profile";
     } else {
       document.body.removeChild(this.modal);
       this.options.onClose();

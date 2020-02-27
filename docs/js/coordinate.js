@@ -1,8 +1,9 @@
-const coord = document.getElementsByClassName('coord-bar');
+const coord = document.getElementById('coord-bar');
 
 canvas.addEventListener('mousemove', (e) => {
+    let mul = canvas.height / canvas.offsetHeight;
     let rect = canvas.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
-    coord[0].textContent =  `x: ${Math.round(x)}, y: ${y}`;
+    xCoord = Math.round((e.clientX - rect.left) * mul);
+    yCoord = Math.round((e.clientY - rect.top) * mul);
+    coord.textContent =  `x: ${Math.round(xCoord)}, y: ${Math.round(yCoord)}`;
 }, false);
