@@ -37,10 +37,11 @@ btnReset.addEventListener('click', () => {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
         return;
     }
-    drawByPosition(historyChanges.length - 1);
+    drawByPosition(currentPositionInHistory);
     brightness.value = 0;
     contrast.value = 0;
     bin.value = 128;
+    yClick = null;
 }, false);
 btnLoad.addEventListener('change', loadImage, false);
 btnSave.addEventListener('click', saveImage, false);
@@ -117,6 +118,7 @@ function applyChanges() {
     brightness.value = 0;
     contrast.value = 0;
     bin.value = 128;
+    yClick = null;
     tata.success('Успех', 'Изменения зафиксированы!', { duration: 1700 })
     tempImage.src = canvas.toDataURL("image/jpeg");
     historyPush(tempImage.src);
@@ -129,6 +131,7 @@ function historyPush(src) {
 
 function clearVariables() {
     historyChanges.length = 0;
+    yClick = null;
     currentPositionInHistory = -1;
     brightness.value = 0;
     contrast.value = 0;

@@ -1,13 +1,15 @@
 const histogramBtn = document.getElementById('histogram');
 const profileBtn = document.getElementById('profile');
 
-let xClick, yClick;
+let yClick;
 
 histogramBtn.addEventListener('click', () => {
     if (historyChanges.length === 0) {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
         return;
     }
+    yClick = null;
+    drawByPosition(currentPositionInHistory);
     getHistogram();
 }, false);
 profileBtn.addEventListener('click', () => {
@@ -15,13 +17,20 @@ profileBtn.addEventListener('click', () => {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
         return;
     }
+    if (!yClick) {
+        tata.error('Ошибка', 'Необходимо выбрать строку пикселей!');
+        return;
+    }
+    drawByPosition(currentPositionInHistory);
     getProfile();
+    yClick = null;
 }, false);
 canvas.addEventListener('click', (e) => {
+    drawByPosition(currentPositionInHistory);
     let mul = canvas.height / canvas.offsetHeight;
     let rect = canvas.getBoundingClientRect();
-    xClick = Math.round((e.clientX - rect.left) * mul);
     yClick = Math.round((e.clientY - rect.top) * mul);
+    ctx.strokeRect(0, yClick, canvas.width, 5);
 }, false);
 
 
@@ -126,7 +135,6 @@ function calcAndProfile() {
         b.push(iD[i + 2]);
     }
     drawProfile(r, g, b);
-    ctx.fillRect(0, yClick, canvas.width, 5);
 }
 
 function drawProfile(r, g, b) {
@@ -175,7 +183,7 @@ function drawProfile(r, g, b) {
                 show: true
             },
             title: {
-                text: 'Ширина',
+                text: 'Длина',
                 style: {
                     fontSize: '16px'
                 },
