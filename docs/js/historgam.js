@@ -1,17 +1,10 @@
-const histogramBtn = document.getElementById('histogram');
 const profileBtn = document.getElementById('profile');
+const horizontalRadio = document.getElementById('horizontalRadio');
+const verticalRadio = document.getElementById('verticalRadio');
 
-let yClick;
+let yClick, xClick;
+let horizontal = true;
 
-histogramBtn.addEventListener('click', () => {
-    if (historyChanges.length === 0) {
-        tata.error('Ошибка', 'Необходимо загрузить картинку!');
-        return;
-    }
-    yClick = null;
-    drawByPosition(currentPositionInHistory);
-    getHistogram();
-}, false);
 profileBtn.addEventListener('click', () => {
     if (historyChanges.length === 0) {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
@@ -25,24 +18,26 @@ profileBtn.addEventListener('click', () => {
     getProfile();
     yClick = null;
 }, false);
+horizontalRadio.addEventListener('click', () => {
+    horizontal = true;
+}, false);
+verticalRadio.addEventListener('click', () => {
+    horizontal = false;
+}, false);
 canvas.addEventListener('click', (e) => {
+    if (historyChanges.length === 0) {
+        tata.error('Ошибка', 'Необходимо загрузить картинку!');
+        return;
+    }
     drawByPosition(currentPositionInHistory);
     let mul = canvas.height / canvas.offsetHeight;
     let rect = canvas.getBoundingClientRect();
     yClick = Math.round((e.clientY - rect.top) * mul);
-    ctx.strokeRect(0, yClick, canvas.width, 5);
+    xClick = Math.round((e.clientX - rect.left) * mul);
+    horizontal ? ctx.strokeRect(0, yClick, canvas.width, 5) : ctx.strokeRect(xClick, 0, 5, canvas.height);
 }, false);
 
 
-
-function getHistogram() {
-    Modal.alert({
-        title: '<h5 style="margin-bottom: 0">Гистограмма по яркости и трем цветовым каналам</h5>',
-        message: '<div id="graphics-container"></div>',
-        graphics: true
-    });
-    calcAndHist();
-}
 
 function calcAndHist() {
     let r = [], g = [], b = [], pixelSum = [];
@@ -69,6 +64,7 @@ function drawHistogram(pixelSum, r, g, b) {
             zoom: false,
             type: 'bar',
             height: 350,
+            width: 600,
             toolbar: {
                 tools: {
                     pan: false
@@ -111,7 +107,7 @@ function drawHistogram(pixelSum, r, g, b) {
             max: 255
         }
     };
-    let chart = new ApexCharts(document.getElementById("graphics-container"), options);
+    let chart = new ApexCharts(document.getElementById("histogram-containers"), options);
     chart.render();
 }
 
@@ -128,7 +124,12 @@ function getProfile() {
 
 function calcAndProfile() {
     let r = [], g = [], b = [];
-    const iD = ctx.getImageData(0, yClick, canvas.width, 1).data;
+    let iD;
+    if (horizontal) {
+        iD = ctx.getImageData(0, yClick, canvas.width, 1).data;
+    } else {
+        iD =ctx.getImageData(xClick, 0, 1, canvas.height).data;
+    }
     for (let i = 0; i < iD.length; i += 4) {
         r.push(iD[i]);
         g.push(iD[i + 1]);
@@ -189,7 +190,7 @@ function drawProfile(r, g, b) {
                 },
             },
             min: 0,
-            max: canvas.width
+            max: horizontal ? canvas.width : canvas.height
         },
         grid: {
             borderColor: '#f1f1f1',

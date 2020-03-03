@@ -7,6 +7,7 @@ const btnForward = document.getElementById('btn-forward');
 const btnInfo = document.getElementById('btn-info');
 const btnGetCurrentImage = document.getElementById('get-current-image');
 const btnGetOriginalImage = document.getElementById('get-original-image');
+const histContainer = document.getElementById('histogram-containers');
 
 const brightness = document.getElementById('input-brightness');
 const contrast = document.getElementById('input-contrast');
@@ -31,7 +32,11 @@ let historyChanges = [];
 let currentPositionInHistory = -1;
 
 
-btnApply.addEventListener('click', applyChanges, false);
+btnApply.addEventListener('click', () => {
+    applyChanges();
+    histContainer.innerHTML = "";
+    setTimeout(() => calcAndHist(), 500);
+}, false);
 btnReset.addEventListener('click', () => { 
     if (historyChanges.length === 0) {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
@@ -43,7 +48,11 @@ btnReset.addEventListener('click', () => {
     bin.value = 128;
     yClick = null;
 }, false);
-btnLoad.addEventListener('change', loadImage, false);
+btnLoad.addEventListener('change', (e) => {
+    loadImage(e);
+    histContainer.innerHTML = "";
+    setTimeout(() => calcAndHist(), 500);
+}, false);
 btnSave.addEventListener('click', saveImage, false);
 btnInfo.addEventListener('click', () => {
     if (historyChanges.length === 0) {
@@ -68,6 +77,8 @@ btnBack.addEventListener('click', () => {
     if (currentPositionInHistory > 0) {
         currentPositionInHistory--;
         drawByPosition(currentPositionInHistory);
+        histContainer.innerHTML = "";
+        setTimeout(() => calcAndHist(), 500);
     }
 }, false);
 btnForward.addEventListener('click', () => {
@@ -78,6 +89,8 @@ btnForward.addEventListener('click', () => {
     if (currentPositionInHistory < historyChanges.length - 1) {
         currentPositionInHistory++;
         drawByPosition(currentPositionInHistory);
+        histContainer.innerHTML = "";
+        setTimeout(() => calcAndHist(), 500);
     }
 }, false);
 btnGetCurrentImage.addEventListener('click', () => {
@@ -87,6 +100,8 @@ btnGetCurrentImage.addEventListener('click', () => {
     }
     currentPositionInHistory = historyChanges.length - 1;
     drawByPosition(historyChanges.length - 1);
+    histContainer.innerHTML = "";
+    setTimeout(() => calcAndHist(), 500);
 }, false);
 btnGetOriginalImage.addEventListener('click', () => {
     if (historyChanges.length === 0) {
@@ -95,6 +110,8 @@ btnGetOriginalImage.addEventListener('click', () => {
     }
     currentPositionInHistory = 0;
     drawByPosition(0);
+    histContainer.innerHTML = "";
+    setTimeout(() => calcAndHist(), 500);
 }, false);
 swapColors.addEventListener('click', () => {
     let temp = colorPick1.value;

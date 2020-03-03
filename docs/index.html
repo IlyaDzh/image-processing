@@ -93,15 +93,28 @@
             <div class="panel">
                 <div class="heading">
                     <i class="fas fa-chart-bar aside-icon"></i>
-                    Графики
+                    Профиль яркости
                 </div>
                 <div class="content">
-                    <div class="pb-2 pt-1">
-                        <button id="histogram" class="btn btn-block btn-info btn-sm">
-                            Гистограммы
-                        </button>
+                    <div class="pb-2">
+                        <div class="text-center pb-2">
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="horizontalRadio" name="verticalRadio"
+                                    class="custom-control-input" checked>
+                                <label class="custom-control-label" for="horizontalRadio">
+                                    <i class="fas fa-arrows-alt-h"></i>
+                                </label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="verticalRadio" name="verticalRadio"
+                                    class="custom-control-input">
+                                <label class="custom-control-label" for="verticalRadio">
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                </label>
+                            </div>
+                        </div>
                         <button id="profile" class="btn btn-block btn-info btn-sm">
-                            Профиль яркости
+                            Открыть профиль
                         </button>
                     </div>
                 </div>
@@ -199,6 +212,7 @@
             </div>
             <canvas id="canvas"></canvas>
         </div>
+        <div id="histogram-containers"></div>
         <div id="coord-bar"></div>
     </div>
 
