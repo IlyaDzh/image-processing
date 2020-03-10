@@ -9,6 +9,7 @@ const btnGetCurrentImage = document.getElementById('get-current-image');
 const btnGetOriginalImage = document.getElementById('get-original-image');
 const histContainer = document.getElementById('histogram-containers');
 
+const noise = document.getElementById('input-noise');
 const brightness = document.getElementById('input-brightness');
 const contrast = document.getElementById('input-contrast');
 const grayscale = document.getElementById('grayscale');
@@ -37,12 +38,13 @@ btnApply.addEventListener('click', () => {
     histContainer.innerHTML = "";
     setTimeout(() => calcAndHist(), 500);
 }, false);
-btnReset.addEventListener('click', () => { 
+btnReset.addEventListener('click', () => {
     if (historyChanges.length === 0) {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
         return;
     }
     drawByPosition(currentPositionInHistory);
+    noise.value = 0;
     brightness.value = 0;
     contrast.value = 0;
     bin.value = 128;
@@ -118,6 +120,7 @@ swapColors.addEventListener('click', () => {
     colorPick1.value = colorPick2.value;
     colorPick2.value = temp;
 }, false);
+noise.addEventListener('input', () => setNoise(Number(event.target.value)), false);
 brightness.addEventListener('input', () => setBrightness(Number(event.target.value)), false);
 contrast.addEventListener('input', () => setContrast(Number(event.target.value)), false);
 bin.addEventListener('input', () => imageToBin(Number(event.target.value), hexToRgb(colorPick1.value), hexToRgb(colorPick2.value)), false);
@@ -132,6 +135,7 @@ function applyChanges() {
         tata.error('Ошибка', 'Необходимо загрузить картинку!');
         return;
     }
+    noise.value = 0;
     brightness.value = 0;
     contrast.value = 0;
     bin.value = 128;
@@ -150,6 +154,7 @@ function clearVariables() {
     historyChanges.length = 0;
     yClick = null;
     currentPositionInHistory = -1;
+    noise.value = 0;
     brightness.value = 0;
     contrast.value = 0;
     bin.value = 128;
@@ -206,6 +211,29 @@ function saveImage() {
     link.href = canvas.toDataURL("image/jpeg");
     link.download = "image_name.jpg";
     link.click();
+}
+
+function setNoise(noiseMul) {
+    drawByPosition(currentPositionInHistory);
+
+    let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < imgPixels.data.length; i += 4) {
+        let v = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
+        imgPixels.data[i] = v >= 127 ? 0 : 255;
+        imgPixels.data[i + 1] = v >= 127 ? 0 : 255;
+        imgPixels.data[i + 2] = v >= 127 ? 0 : 255;
+    }
+
+    for (let i = 0; i < imgPixels.data.length; i += 4) {
+        let isBlack = imgPixels.data[i] == 0 ? true : false;
+        let rand = Math.random();
+
+        imgPixels.data[i] = isBlack ? (rand >= noiseMul ? 0 : 255) : (rand >= noiseMul ? 255 : 0);
+        imgPixels.data[i + 1] = isBlack ? (rand >= noiseMul ? 0 : 255) : (rand >= noiseMul ? 255 : 0);
+        imgPixels.data[i + 2] = isBlack ? (rand >= noiseMul ? 0 : 255) : (rand >= noiseMul ? 255 : 0);
+    }
+
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
 
 function setBrightness(brightnessMul) {
