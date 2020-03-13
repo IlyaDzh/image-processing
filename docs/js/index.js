@@ -9,6 +9,8 @@ const btnGetCurrentImage = document.getElementById('get-current-image');
 const btnGetOriginalImage = document.getElementById('get-original-image');
 const histContainer = document.getElementById('histogram-containers');
 
+const linear = document.getElementById('linear');
+const median = document.getElementById('median');
 const noise = document.getElementById('input-noise');
 const brightness = document.getElementById('input-brightness');
 const contrast = document.getElementById('input-contrast');
@@ -120,6 +122,8 @@ swapColors.addEventListener('click', () => {
     colorPick1.value = colorPick2.value;
     colorPick2.value = temp;
 }, false);
+linear.addEventListener('click', imageToLinear, false);
+median.addEventListener('click', imageToMedian, false);
 noise.addEventListener('input', () => setNoise(Number(event.target.value)), false);
 brightness.addEventListener('input', () => setBrightness(Number(event.target.value)), false);
 contrast.addEventListener('input', () => setContrast(Number(event.target.value)), false);
@@ -276,9 +280,9 @@ function imageToSepia() {
     drawByPosition(currentPositionInHistory);
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < imgPixels.data.length; i += 4) {
-        var r = imgPixels.data[i];
-        var g = imgPixels.data[i + 1];
-        var b = imgPixels.data[i + 2];
+        let r = imgPixels.data[i];
+        let g = imgPixels.data[i + 1];
+        let b = imgPixels.data[i + 2];
         imgPixels.data[i] = (r * 0.393) + (g * 0.769) + (b * 0.189);
         imgPixels.data[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
         imgPixels.data[i + 2] = (r * 0.272) + (g * 0.534) + (b * 0.131);
@@ -307,4 +311,125 @@ function imageToBin(binMul, color1, color2) {
         imgPixels.data[i + 2] = v > binMul ? color1.b : color2.b;
     }
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+}
+
+function imageToLinear() {
+    drawByPosition(currentPositionInHistory);
+
+    let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    let temp = toMatrix(imgPixels.data, imgPixels.width * 4);
+
+    for (let i = 0; i < temp.length; i++)
+        temp[i] = toMatrix(temp[i], 4);
+
+    try {
+        for (let j = 0; j < canvas.width; j++) {
+            for (let i = 0; i < canvas.height; i++) {
+                if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
+                else {
+                    let r_summ = temp[i - 1][j - 1][0];
+                    let g_summ = temp[i - 1][j - 1][1];
+                    let b_summ = temp[i - 1][j - 1][2];
+
+                    r_summ = r_summ + temp[i - 1][j][0];
+                    g_summ = g_summ + temp[i - 1][j][1];
+                    b_summ = b_summ + temp[i - 1][j][2];
+
+                    r_summ += temp[i - 1][j + 1][0];
+                    g_summ += temp[i - 1][j + 1][1];
+                    b_summ += temp[i - 1][j + 1][2];
+
+                    r_summ = r_summ + temp[i][j - 1][0];
+                    g_summ = g_summ + temp[i][j - 1][1];
+                    b_summ = b_summ + temp[i][j - 1][2];
+
+                    r_summ = r_summ + temp[i][j][0];
+                    g_summ = g_summ + temp[i][j][1];
+                    b_summ = b_summ + temp[i][j][2];
+
+                    r_summ = r_summ + temp[i][j + 1][0];
+                    g_summ = g_summ + temp[i][j + 1][1];
+                    b_summ = b_summ + temp[i][j + 1][2];
+
+                    r_summ = r_summ + temp[i + 1][j - 1][0];
+                    g_summ = g_summ + temp[i + 1][j - 1][1];
+                    b_summ = b_summ + temp[i + 1][j - 1][2];
+
+                    r_summ = r_summ + temp[i + 1][j][0];
+                    g_summ = g_summ + temp[i + 1][j][1];
+                    b_summ = b_summ + temp[i + 1][j][2];
+
+                    r_summ = r_summ + temp[i + 1][j + 1][0];
+                    g_summ = g_summ + temp[i + 1][j + 1][1];
+                    b_summ = b_summ + temp[i + 1][j + 1][2];
+
+                    r_summ = r_summ / 9;
+                    g_summ = g_summ / 9;
+                    b_summ = b_summ / 9;
+
+                    temp[i][j][0] = Math.floor(r_summ);
+                    temp[i][j][1] = Math.floor(g_summ);
+                    temp[i][j][2] = Math.floor(b_summ);
+                }
+            }
+        }
+    }
+    catch{ }
+
+    temp = new Uint8ClampedArray(temp.toString().split(',').map(function (v) {
+        return +v
+    }));
+
+    imgPixels.data.set(temp);
+
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+}
+
+function imageToMedian() {
+    drawByPosition(currentPositionInHistory);
+
+    let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    let temp = toMatrix(imgPixels.data, imgPixels.width * 4);
+
+    for (let i = 0; i < temp.length; i++)
+        temp[i] = toMatrix(temp[i], 4);
+
+    try {
+        for (let j = 0; j < canvas.width; j++) {
+            for (let i = 0; i < canvas.height; i++) {
+                if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
+                else {
+                    let r_summ = [temp[i][j - 1][0], temp[i][j][0], temp[i][j + 1][0]];
+                    let g_summ = [temp[i][j - 1][1], temp[i][j][1], temp[i][j + 1][1]];
+                    let b_summ = [temp[i][j - 1][2], temp[i][j][2], temp[i][j + 1][2]];
+
+                    r_summ.sort();
+                    g_summ.sort();
+                    b_summ.sort();
+
+                    temp[i][j][0] = r_summ[1];
+                    temp[i][j][1] = g_summ[1];
+                    temp[i][j][2] = b_summ[1];
+                }
+            }
+        }
+    }
+    catch{ }
+
+    temp = new Uint8ClampedArray(temp.toString().split(',').map(function (v) {
+        return +v
+    }));
+
+    imgPixels.data.set(temp);
+
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+}
+
+function toMatrix(array, chunkSize) {
+    let R = [];
+    for (let i = 0; i < array.length; i += chunkSize)
+        R.push(array.slice(i, i + chunkSize));
+    return R;
 }
