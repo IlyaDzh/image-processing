@@ -37,7 +37,6 @@ let currentPositionInHistory = -1;
 
 btnApply.addEventListener('click', () => {
     applyChanges();
-    histContainer.innerHTML = "";
     setTimeout(() => calcAndHist(), 500);
 }, false);
 btnReset.addEventListener('click', () => {
@@ -54,7 +53,6 @@ btnReset.addEventListener('click', () => {
 }, false);
 btnLoad.addEventListener('change', (e) => {
     loadImage(e);
-    histContainer.innerHTML = "";
     setTimeout(() => calcAndHist(), 500);
 }, false);
 btnSave.addEventListener('click', saveImage, false);
@@ -81,7 +79,6 @@ btnBack.addEventListener('click', () => {
     if (currentPositionInHistory > 0) {
         currentPositionInHistory--;
         drawByPosition(currentPositionInHistory);
-        histContainer.innerHTML = "";
         setTimeout(() => calcAndHist(), 500);
     }
 }, false);
@@ -93,7 +90,6 @@ btnForward.addEventListener('click', () => {
     if (currentPositionInHistory < historyChanges.length - 1) {
         currentPositionInHistory++;
         drawByPosition(currentPositionInHistory);
-        histContainer.innerHTML = "";
         setTimeout(() => calcAndHist(), 500);
     }
 }, false);
@@ -104,7 +100,6 @@ btnGetCurrentImage.addEventListener('click', () => {
     }
     currentPositionInHistory = historyChanges.length - 1;
     drawByPosition(historyChanges.length - 1);
-    histContainer.innerHTML = "";
     setTimeout(() => calcAndHist(), 500);
 }, false);
 btnGetOriginalImage.addEventListener('click', () => {
@@ -114,7 +109,6 @@ btnGetOriginalImage.addEventListener('click', () => {
     }
     currentPositionInHistory = 0;
     drawByPosition(0);
-    histContainer.innerHTML = "";
     setTimeout(() => calcAndHist(), 500);
 }, false);
 swapColors.addEventListener('click', () => {
@@ -176,6 +170,13 @@ function hexToRgb(hex) {
         .substring(1).match(/.{2}/g)
         .map(x => parseInt(x, 16))
     return { r: rgb[0], g: rgb[1], b: rgb[2] };
+}
+
+function toMatrix(array, chunkSize) {
+    let R = [];
+    for (let i = 0; i < array.length; i += chunkSize)
+        R.push(array.slice(i, i + chunkSize));
+    return R;
 }
 
 
@@ -377,9 +378,7 @@ function imageToLinear() {
     }
     catch{ }
 
-    temp = new Uint8ClampedArray(temp.toString().split(',').map(function (v) {
-        return +v
-    }));
+    temp = new Uint8ClampedArray(temp.toString().split(',').map(v => +v));
 
     imgPixels.data.set(temp);
 
@@ -401,35 +400,58 @@ function imageToMedian() {
             for (let i = 0; i < canvas.height; i++) {
                 if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
                 else {
-                    let r_summ = [temp[i][j - 1][0], temp[i][j][0], temp[i][j + 1][0]];
-                    let g_summ = [temp[i][j - 1][1], temp[i][j][1], temp[i][j + 1][1]];
-                    let b_summ = [temp[i][j - 1][2], temp[i][j][2], temp[i][j + 1][2]];
+                    let r_summ = [
+                        temp[i - 1][j - 1][0],
+                        temp[i - 1][j][0],
+                        temp[i - 1][j + 1][0],
+                        temp[i][j - 1][0],
+                        temp[i][j][0],
+                        temp[i][j + 1][0],
+                        temp[i + 1][j - 1][0],
+                        temp[i + 1][j][0],
+                        temp[i + 1][j + 1][0]
+                    ];
+
+                    let g_summ = [
+                        temp[i - 1][j - 1][1],
+                        temp[i - 1][j][1],
+                        temp[i - 1][j + 1][1],
+                        temp[i][j - 1][1],
+                        temp[i][j][1],
+                        temp[i][j + 1][1],
+                        temp[i + 1][j - 1][1],
+                        temp[i + 1][j][1],
+                        temp[i + 1][j + 1][1]
+                    ];
+
+                    let b_summ = [
+                        temp[i - 1][j - 1][2],
+                        temp[i - 1][j][2],
+                        temp[i - 1][j + 1][2],
+                        temp[i][j - 1][2],
+                        temp[i][j][2],
+                        temp[i][j + 1][2],
+                        temp[i + 1][j - 1][2],
+                        temp[i + 1][j][2],
+                        temp[i + 1][j + 1][2]
+                    ];
 
                     r_summ.sort();
                     g_summ.sort();
                     b_summ.sort();
 
-                    temp[i][j][0] = r_summ[1];
-                    temp[i][j][1] = g_summ[1];
-                    temp[i][j][2] = b_summ[1];
+                    temp[i][j][0] = r_summ[4];
+                    temp[i][j][1] = g_summ[4];
+                    temp[i][j][2] = b_summ[4];
                 }
             }
         }
     }
     catch{ }
 
-    temp = new Uint8ClampedArray(temp.toString().split(',').map(function (v) {
-        return +v
-    }));
+    temp = new Uint8ClampedArray(temp.toString().split(',').map(v => +v));
 
     imgPixels.data.set(temp);
 
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
-}
-
-function toMatrix(array, chunkSize) {
-    let R = [];
-    for (let i = 0; i < array.length; i += chunkSize)
-        R.push(array.slice(i, i + chunkSize));
-    return R;
 }

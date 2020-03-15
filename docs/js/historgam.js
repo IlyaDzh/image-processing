@@ -40,6 +40,8 @@ canvas.addEventListener('click', (e) => {
 
 
 function calcAndHist() {
+    if (!displayHist) return;
+    histContainer.innerHTML = "";
     let r = [], g = [], b = [], pixelSum = [];
     const iD = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     for (let i = 0; i < 256; i++) { r[i] = 0; g[i] = 0; b[i] = 0; pixelSum[i] = 0; }
@@ -128,7 +130,7 @@ function calcAndProfile() {
     if (horizontal) {
         iD = ctx.getImageData(0, yClick, canvas.width, 1).data;
     } else {
-        iD =ctx.getImageData(xClick, 0, 1, canvas.height).data;
+        iD = ctx.getImageData(xClick, 0, 1, canvas.height).data;
     }
     for (let i = 0; i < iD.length; i += 4) {
         r.push(iD[i]);

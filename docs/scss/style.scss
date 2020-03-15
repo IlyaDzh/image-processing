@@ -175,12 +175,25 @@ input[type="color"] {
     overflow: hidden;
 }
 
-#coord-bar {
+.coord-bar {
+    display: flex;
+    justify-content: space-between;
     background-color: #fff;
     color: #000;
     font-size: 15px;
     padding: 0 13px;
     border-top: 1px solid #e3e3e3;
+
+    &__hist {
+        height: 24px;
+        font-size: 15px;
+        background: none;
+        border: none;
+
+        &:focus {
+            outline: none;
+        }
+    }
 }
 
 #histogram-containers {
