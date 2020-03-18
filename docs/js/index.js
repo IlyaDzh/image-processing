@@ -193,11 +193,51 @@ function toMatrix(array, chunkSize) {
     return R;
 }
 
-function add_mod8(x, y) {
-    let summ = x + y;
-    if (summ > 7)
-        summ = summ - 8;
-    return summ;
+function convolution(pixels, weights) {
+    let side = Math.round(Math.sqrt(weights.length));
+    let halfSide = Math.floor(side / 2);
+    let src = pixels.data;
+    let canvasWidth = pixels.width;
+    let canvasHeight = pixels.height;
+    let temporaryCanvas = document.createElement('canvas');
+    let temporaryCtx = temporaryCanvas.getContext('2d');
+    let outputData = temporaryCtx.createImageData(canvasWidth, canvasHeight);
+
+    for (let y = 0; y < canvasHeight; y++) {
+
+        for (let x = 0; x < canvasWidth; x++) {
+
+            let dstOff = (y * canvasWidth + x) * 4;
+            let sumReds = 0, sumGreens = 0, sumBlues = 0;
+
+            for (let kernelY = 0; kernelY < side; kernelY++) {
+                for (let kernelX = 0; kernelX < side; kernelX++) {
+
+                    let currentKernelY = y + kernelY - halfSide;
+                    let currentKernelX = x + kernelX - halfSide;
+
+                    if (currentKernelY >= 0 &&
+                        currentKernelY < canvasHeight &&
+                        currentKernelX >= 0 &&
+                        currentKernelX < canvasWidth) {
+
+                        let offset = (currentKernelY * canvasWidth + currentKernelX) * 4;
+                        let weight = weights[kernelY * side + kernelX];
+
+                        sumReds += src[offset] * weight;
+                        sumGreens += src[offset + 1] * weight;
+                        sumBlues += src[offset + 2] * weight;
+                    }
+                }
+            }
+
+            outputData.data[dstOff] = sumReds;
+            outputData.data[dstOff + 1] = sumGreens;
+            outputData.data[dstOff + 2] = sumBlues;
+            outputData.data[dstOff + 3] = 255;
+        }
+    }
+    return outputData;
 }
 
 
@@ -477,112 +517,38 @@ function imageToMedian() {
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
 
-
-// no
 function imageToCirsh() {
     drawByPosition(currentPositionInHistory);
 
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    let temp = toMatrix(imgPixels.data, imgPixels.width * 4);
+    let weight = [
+        -3, 5, 5,
+        -3, 0, 5,
+        -3, -3, -3
+    ]
 
-    for (let i = 0; i < temp.length; i++)
-        temp[i] = toMatrix(temp[i], 4);
-
-    try {
-        for (let j = 0; j < canvas.width; j++) {
-            for (let i = 0; i < canvas.height; i++) {
-                if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
-                else {
-                    let r = [
-                        temp[i - 1][j - 1][0],
-                        temp[i - 1][j][0],
-                        temp[i - 1][j + 1][0],
-                        temp[i][j - 1][0],
-                        temp[i][j + 1][0],
-                        temp[i + 1][j - 1][0],
-                        temp[i + 1][j][0],
-                        temp[i + 1][j + 1][0]
-                    ]
-
-                    let g = [
-                        temp[i - 1][j - 1][1],
-                        temp[i - 1][j][1],
-                        temp[i - 1][j + 1][1],
-                        temp[i][j - 1][1],
-                        temp[i][j + 1][1],
-                        temp[i + 1][j - 1][1],
-                        temp[i + 1][j][1],
-                        temp[i + 1][j + 1][1]
-                    ];
-
-                    let b = [
-                        temp[i - 1][j - 1][2],
-                        temp[i - 1][j][2],
-                        temp[i - 1][j + 1][2],
-                        temp[i][j - 1][2],
-                        temp[i][j + 1][2],
-                        temp[i + 1][j - 1][2],
-                        temp[i + 1][j][2],
-                        temp[i + 1][j + 1][2]
-                    ];
-
-                    let s_r = [];
-                    let s_g = [];
-                    let s_b = [];
-
-                    for (let k = 0; k < 8; k++) {
-                        s_r.push(r[k] + add_mod8(r[1], r[k]) + add_mod8(r[2], r[k]));
-                        s_g.push(g[k] + add_mod8(g[1], g[k]) + add_mod8(g[2], g[k]));
-                        s_b.push(b[k] + add_mod8(b[1], b[k]) + add_mod8(b[2], b[k]));
-                    }
-
-                    let t_r = [];
-                    let t_g = [];
-                    let t_b = [];
-
-                    for (let k = 0; k < 8; k++) {
-                        t_r.push(r[k] + add_mod8(r[3], r[k]) + add_mod8(r[4], r[k]) + add_mod8(r[5], r[k]) + add_mod8(r[6], r[k]) + add_mod8(r[7], r[k]));
-                        t_g.push(g[k] + add_mod8(g[3], g[k]) + add_mod8(g[4], g[k]) + add_mod8(g[5], g[k]) + add_mod8(g[6], g[k]) + add_mod8(g[7], g[k]));
-                        t_b.push(b[k] + add_mod8(b[3], b[k]) + add_mod8(b[4], b[k]) + add_mod8(b[5], b[k]) + add_mod8(b[6], b[k]) + add_mod8(b[7], b[k]));
-                    }
-
-                    let f_r = [];
-                    let f_g = [];
-                    let f_b = [];
-
-                    for (let k = 0; k < 8; k++) {
-                        f_r.push(Math.abs(5 * s_r[k] - 3 * t_r[k]));
-                        f_g.push(Math.abs(5 * s_g[k] - 3 * t_g[k]));
-                        f_b.push(Math.abs(5 * s_b[k] - 3 * t_b[k]));
-                    }
-
-                    let nf_r = Math.max(...f_r);
-                    let nf_g = Math.max(...f_g);
-                    let nf_b = Math.max(...f_b);
-
-                    temp[i][j][0] = Number(nf_r);
-                    temp[i][j][1] = Number(nf_g);
-                    temp[i][j][2] = Number(nf_b);
-                }
-            }
-        }
-    }
-    catch{ }
-
-    temp = new Uint8ClampedArray(temp.toString().split(',').map(v => +v));
-
-    imgPixels.data.set(temp);
+    imgPixels = convolution(imgPixels, weight)
 
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
 
-// no
 function imageToLaplas() {
+    drawByPosition(currentPositionInHistory);
 
+    let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    let weight = [
+        -1, -2, -1,
+        -2, 12, -2,
+        -1, -2, -1
+    ]
+
+    imgPixels = convolution(imgPixels, weight)
+
+    ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
 
-// yes
 function imageToRoberts() {
     drawByPosition(currentPositionInHistory);
 
@@ -615,197 +581,70 @@ function imageToRoberts() {
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
 
-// no
 function imageToSobel() {
     drawByPosition(currentPositionInHistory);
 
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    let temp = toMatrix(imgPixels.data, imgPixels.width * 4);
+    let weight = [
+        -1, 0, 1,
+        -2, 0, 2,
+        -1, 0, 1
+    ]
 
-    for (let i = 0; i < temp.length; i++)
-        temp[i] = toMatrix(temp[i], 4);
-
-    // let sobelY = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
-    // let sobelX = [-1, 0, 1, -2, 0, 2, -1, 0, 1];
-
-    // for (let j = 0; j < canvas.width; j++) {
-    //     for (let i = 0; i < canvas.height; i++) {
-    //         if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
-    //         else {
-    //             let x_r = [
-    //                 temp[i - 1][j - 1][0] * sobelX[0],
-    //                 temp[i - 1][j][0] * sobelX[2],
-    //                 temp[i - 1][j + 1][0] * sobelX[2],
-    //                 temp[i][j - 1][0] * sobelX[3],
-    //                 temp[i][j][0] * sobelX[4],
-    //                 temp[i][j + 1][0] * sobelX[5],
-    //                 temp[i + 1][j - 1][0] * sobelX[6],
-    //                 temp[i + 1][j][0] * sobelX[7],
-    //                 temp[i + 1][j + 1][0] * sobelX[8]
-    //             ]
-    //             let y_r = [
-    //                 temp[i - 1][j - 1][0] * sobelY[0],
-    //                 temp[i - 1][j][0] * sobelY[2],
-    //                 temp[i - 1][j + 1][0] * sobelY[2],
-    //                 temp[i][j - 1][0] * sobelY[3],
-    //                 temp[i][j][0] * sobelY[4],
-    //                 temp[i][j + 1][0] * sobelY[5],
-    //                 temp[i + 1][j - 1][0] * sobelY[6],
-    //                 temp[i + 1][j][0] * sobelY[7],
-    //                 temp[i + 1][j + 1][0] * sobelY[8]
-    //             ]
-
-    //             let x_g = [
-    //                 temp[i - 1][j - 1][1] * sobelX[0],
-    //                 temp[i - 1][j][1] * sobelX[2],
-    //                 temp[i - 1][j + 1][1] * sobelX[2],
-    //                 temp[i][j - 1][1] * sobelX[3],
-    //                 temp[i][j][1] * sobelX[4],
-    //                 temp[i][j + 1][1] * sobelX[5],
-    //                 temp[i + 1][j - 1][1] * sobelX[6],
-    //                 temp[i + 1][j][1] * sobelX[7],
-    //                 temp[i + 1][j + 1][1] * sobelX[8]
-    //             ]
-    //             let y_g = [
-    //                 temp[i - 1][j - 1][1] * sobelY[0],
-    //                 temp[i - 1][j][1] * sobelY[2],
-    //                 temp[i - 1][j + 1][1] * sobelY[2],
-    //                 temp[i][j - 1][1] * sobelY[3],
-    //                 temp[i][j][1] * sobelY[4],
-    //                 temp[i][j + 1][1] * sobelY[5],
-    //                 temp[i + 1][j - 1][1] * sobelY[6],
-    //                 temp[i + 1][j][1] * sobelY[7],
-    //                 temp[i + 1][j + 1][1] * sobelY[8]
-    //             ]
-
-    //             let x_b = [
-    //                 temp[i - 1][j - 1][2] * sobelX[0],
-    //                 temp[i - 1][j][2] * sobelX[2],
-    //                 temp[i - 1][j + 1][2] * sobelX[2],
-    //                 temp[i][j - 1][2] * sobelX[3],
-    //                 temp[i][j][2] * sobelX[4],
-    //                 temp[i][j + 1][2] * sobelX[5],
-    //                 temp[i + 1][j - 1][2] * sobelX[6],
-    //                 temp[i + 1][j][2] * sobelX[7],
-    //                 temp[i + 1][j + 1][2] * sobelX[8]
-    //             ]
-    //             let y_b = [
-    //                 temp[i - 1][j - 1][2] * sobelY[0],
-    //                 temp[i - 1][j][2] * sobelY[2],
-    //                 temp[i - 1][j + 1][2] * sobelY[2],
-    //                 temp[i][j - 1][2] * sobelY[3],
-    //                 temp[i][j][2] * sobelY[4],
-    //                 temp[i][j + 1][2] * sobelY[5],
-    //                 temp[i + 1][j - 1][2] * sobelY[6],
-    //                 temp[i + 1][j][2] * sobelY[7],
-    //                 temp[i + 1][j + 1][2] * sobelY[8]
-    //             ]
-
-    //             x_r = x_r.reduce((prev, next) => prev + next);
-    //             x_g = x_g.reduce((prev, next) => prev + next);
-    //             x_b = x_b.reduce((prev, next) => prev + next);
-    //             y_r = y_r.reduce((prev, next) => prev + next);
-    //             y_g = y_g.reduce((prev, next) => prev + next);
-    //             y_b = y_b.reduce((prev, next) => prev + next);
-
-    //             let r = Math.sqrt(x_r * x_r + y_r * y_r);
-    //             let g = Math.sqrt(x_g * x_g + y_g * y_g);
-    //             let b = Math.sqrt(x_b * x_b + y_b * y_b);
-
-    //             temp[i][j][0] = r;
-    //             temp[i][j][1] = g;
-    //             temp[i][j][2] = b;
-    //         }
-    //     }
-    // }
-    for (let j = 0; j < canvas.width; j++) {
-        for (let i = 0; i < canvas.height; i++) {
-            if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
-            else {
-                let x_r =
-                    (temp[i - 1][j + 1][0] + 2 * temp[i][j + 1][0] + temp[i + 1][j + 1][0]) -
-                    (temp[i - 1][j - 1][0] + 2 * temp[i][j - 1][0] + temp[i + 1][j - 1][0]);
-                let y_r =
-                    (temp[i - 1][j - 1][0] + 2 * temp[i - 1][j][0] + temp[i - 1][j + 1][0]) -
-                    (temp[i + 1][j - 1][0] + 2 * temp[i + 1][j][0] + temp[i + 1][j + 1][0]);
-
-                let x_g =
-                    (temp[i - 1][j + 1][1] + 2 * temp[i][j + 1][1] + temp[i + 1][j + 1][1]) -
-                    (temp[i - 1][j - 1][1] + 2 * temp[i][j - 1][1] + temp[i + 1][j - 1][1]);
-                let y_g =
-                    (temp[i - 1][j - 1][1] + 2 * temp[i - 1][j][1] + temp[i - 1][j + 1][1]) -
-                    (temp[i + 1][j - 1][1] + 2 * temp[i + 1][j][1] + temp[i + 1][j + 1][1]);
-
-                let x_b =
-                    (temp[i - 1][j + 1][2] + 2 * temp[i][j + 1][2] + temp[i + 1][j + 1][2]) -
-                    (temp[i - 1][j - 1][2] + 2 * temp[i][j - 1][2] + temp[i + 1][j - 1][2]);
-                let y_b =
-                    (temp[i - 1][j - 1][2] + 2 * temp[i - 1][j][2] + temp[i - 1][j + 1][2]) -
-                    (temp[i + 1][j - 1][2] + 2 * temp[i + 1][j][2] + temp[i + 1][j + 1][2]);
-
-                let g_r = Math.sqrt(x_r * x_r + y_r * y_r);
-                let g_g = Math.sqrt(x_g * x_g + y_g * y_g);
-                let g_b = Math.sqrt(x_b * x_b + y_b * y_b);
-
-                temp[i][j][0] = g_r;
-                temp[i][j][1] = g_g;
-                temp[i][j][2] = g_b;
-            }
-        }
-    }
-
-    temp = new Uint8ClampedArray(temp.toString().split(',').map(v => +v));
-
-    imgPixels.data.set(temp);
+    imgPixels = convolution(imgPixels, weight)
 
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
 
-// no
 function imageToUolles() {
     drawByPosition(currentPositionInHistory);
 
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
     let temp = toMatrix(imgPixels.data, imgPixels.width * 4);
-
     for (let i = 0; i < temp.length; i++)
         temp[i] = toMatrix(temp[i], 4);
 
-    for (let j = 0; j < canvas.width; j++) {
-        for (let i = 0; i < canvas.height; i++) {
+    let temporaryCanvas = document.createElement('canvas');
+    let temporaryCtx = temporaryCanvas.getContext('2d');
+    let outputData = temporaryCtx.createImageData(canvas.width, canvas.height);
+    outputData = toMatrix(outputData.data, outputData.width * 4);
+    for (let i = 0; i < outputData.length; i++)
+        outputData[i] = toMatrix(outputData[i], 4);
+
+    for (let i = 0; i < canvas.height; i++) {
+        for (let j = 0; j < canvas.width; j++) {
             if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
             else {
                 let f_r = Math.log((
-                    (temp[i][j][0] + 1) / (temp[i - 1][j][0] + 1) *
-                    (temp[i][j][0] + 1) / (temp[i][j + 1][0] + 1) *
-                    (temp[i][j][0] + 1) / (temp[i + 1][j][0] + 1) *
-                    (temp[i][j][0] + 1) / (temp[i][j - 1][0] + 1))
-                ) / 4;
+                    ((temp[i][j][0] + 1) / (temp[i - 1][j][0] + 1)) *
+                    ((temp[i][j][0] + 1) / (temp[i][j + 1][0] + 1)) *
+                    ((temp[i][j][0] + 1) / (temp[i + 1][j][0] + 1)) *
+                    ((temp[i][j][0] + 1) / (temp[i][j - 1][0] + 1))
+                )) / 4;
                 let f_g = Math.log((
-                    (temp[i][j][1] + 1) / (temp[i - 1][j][1] + 1) *
-                    (temp[i][j][1] + 1) / (temp[i][j + 1][1] + 1) *
-                    (temp[i][j][1] + 1) / (temp[i + 1][j][1] + 1) *
-                    (temp[i][j][1] + 1) / (temp[i][j - 1][1] + 1))
-                ) / 4;
+                    ((temp[i][j][1] + 1) / (temp[i - 1][j][1] + 1)) *
+                    ((temp[i][j][1] + 1) / (temp[i][j + 1][1] + 1)) *
+                    ((temp[i][j][1] + 1) / (temp[i + 1][j][1] + 1)) *
+                    ((temp[i][j][1] + 1) / (temp[i][j - 1][1] + 1))
+                )) / 4;
                 let f_b = Math.log((
-                    (temp[i][j][2] + 1) / (temp[i - 1][j][2] + 1) *
-                    (temp[i][j][2] + 1) / (temp[i][j + 1][2] + 1) *
-                    (temp[i][j][2] + 1) / (temp[i + 1][j][2] + 1) *
-                    (temp[i][j][2] + 1) / (temp[i][j - 1][2] + 1))
-                ) / 4;
+                    ((temp[i][j][2] + 1) / (temp[i - 1][j][2] + 1)) *
+                    ((temp[i][j][2] + 1) / (temp[i][j + 1][2] + 1)) *
+                    ((temp[i][j][2] + 1) / (temp[i + 1][j][2] + 1)) *
+                    ((temp[i][j][2] + 1) / (temp[i][j - 1][2] + 1))
+                )) / 4;
 
-                temp[i][j][0] = Number(f_r * 1000);
-                temp[i][j][1] = Number(f_g * 1000);
-                temp[i][j][2] = Number(f_b * 1000);
+                outputData[i][j][0] = Number(f_r * 1000);
+                outputData[i][j][1] = Number(f_g * 1000);
+                outputData[i][j][2] = Number(f_b * 1000);
+                outputData[i][j][3] = 255;
             }
         }
     }
 
-    temp = new Uint8ClampedArray(temp.toString().split(',').map(v => +v));
-
-    imgPixels.data.set(temp);
+    outputData = new Uint8ClampedArray(outputData.toString().split(',').map(v => +v));
+    imgPixels.data.set(outputData);
 
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
@@ -875,8 +714,6 @@ function imageToStatic() {
             }
         }
     }
-
-    console.log(temp)
 
     temp = new Uint8ClampedArray(temp.toString().split(',').map(v => +v));
 
