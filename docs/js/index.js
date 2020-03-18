@@ -193,6 +193,13 @@ function toMatrix(array, chunkSize) {
     return R;
 }
 
+function add_mod8(x, y) {
+    let summ = x + y;
+    if (summ > 7)
+        summ = summ - 8;
+    return summ;
+}
+
 function convolution(pixels, weights) {
     let side = Math.round(Math.sqrt(weights.length));
     let halfSide = Math.floor(side / 2);
@@ -456,59 +463,56 @@ function imageToMedian() {
     for (let i = 0; i < temp.length; i++)
         temp[i] = toMatrix(temp[i], 4);
 
-    try {
-        for (let j = 0; j < canvas.width; j++) {
-            for (let i = 0; i < canvas.height; i++) {
-                if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
-                else {
-                    let r_summ = [
-                        temp[i - 1][j - 1][0],
-                        temp[i - 1][j][0],
-                        temp[i - 1][j + 1][0],
-                        temp[i][j - 1][0],
-                        temp[i][j][0],
-                        temp[i][j + 1][0],
-                        temp[i + 1][j - 1][0],
-                        temp[i + 1][j][0],
-                        temp[i + 1][j + 1][0]
-                    ];
+    for (let j = 0; j < canvas.width; j++) {
+        for (let i = 0; i < canvas.height; i++) {
+            if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
+            else {
+                let r_summ = [
+                    temp[i - 1][j - 1][0],
+                    temp[i - 1][j][0],
+                    temp[i - 1][j + 1][0],
+                    temp[i][j - 1][0],
+                    temp[i][j][0],
+                    temp[i][j + 1][0],
+                    temp[i + 1][j - 1][0],
+                    temp[i + 1][j][0],
+                    temp[i + 1][j + 1][0]
+                ];
 
-                    let g_summ = [
-                        temp[i - 1][j - 1][1],
-                        temp[i - 1][j][1],
-                        temp[i - 1][j + 1][1],
-                        temp[i][j - 1][1],
-                        temp[i][j][1],
-                        temp[i][j + 1][1],
-                        temp[i + 1][j - 1][1],
-                        temp[i + 1][j][1],
-                        temp[i + 1][j + 1][1]
-                    ];
+                let g_summ = [
+                    temp[i - 1][j - 1][1],
+                    temp[i - 1][j][1],
+                    temp[i - 1][j + 1][1],
+                    temp[i][j - 1][1],
+                    temp[i][j][1],
+                    temp[i][j + 1][1],
+                    temp[i + 1][j - 1][1],
+                    temp[i + 1][j][1],
+                    temp[i + 1][j + 1][1]
+                ];
 
-                    let b_summ = [
-                        temp[i - 1][j - 1][2],
-                        temp[i - 1][j][2],
-                        temp[i - 1][j + 1][2],
-                        temp[i][j - 1][2],
-                        temp[i][j][2],
-                        temp[i][j + 1][2],
-                        temp[i + 1][j - 1][2],
-                        temp[i + 1][j][2],
-                        temp[i + 1][j + 1][2]
-                    ];
+                let b_summ = [
+                    temp[i - 1][j - 1][2],
+                    temp[i - 1][j][2],
+                    temp[i - 1][j + 1][2],
+                    temp[i][j - 1][2],
+                    temp[i][j][2],
+                    temp[i][j + 1][2],
+                    temp[i + 1][j - 1][2],
+                    temp[i + 1][j][2],
+                    temp[i + 1][j + 1][2]
+                ];
 
-                    r_summ.sort();
-                    g_summ.sort();
-                    b_summ.sort();
+                r_summ.sort();
+                g_summ.sort();
+                b_summ.sort();
 
-                    temp[i][j][0] = r_summ[4];
-                    temp[i][j][1] = g_summ[4];
-                    temp[i][j][2] = b_summ[4];
-                }
+                temp[i][j][0] = r_summ[4];
+                temp[i][j][1] = g_summ[4];
+                temp[i][j][2] = b_summ[4];
             }
         }
     }
-    catch{ }
 
     temp = new Uint8ClampedArray(temp.toString().split(',').map(v => +v));
 
@@ -526,9 +530,9 @@ function imageToCirsh() {
         -3, 5, 5,
         -3, 0, 5,
         -3, -3, -3
-    ]
+    ];
 
-    imgPixels = convolution(imgPixels, weight)
+    imgPixels = convolution(imgPixels, weight);
 
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
@@ -585,14 +589,56 @@ function imageToSobel() {
     drawByPosition(currentPositionInHistory);
 
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let temp = toMatrix(imgPixels.data, imgPixels.width * 4);
+    for (let i = 0; i < temp.length; i++)
+        temp[i] = toMatrix(temp[i], 4);
 
-    let weight = [
-        -1, 0, 1,
-        -2, 0, 2,
-        -1, 0, 1
-    ]
+    let temporaryCanvas = document.createElement('canvas');
+    let temporaryCtx = temporaryCanvas.getContext('2d');
+    let outputData = temporaryCtx.createImageData(canvas.width, canvas.height);
+    outputData = toMatrix(outputData.data, outputData.width * 4);
+    for (let i = 0; i < outputData.length; i++)
+        outputData[i] = toMatrix(outputData[i], 4);
 
-    imgPixels = convolution(imgPixels, weight)
+    for (let i = 0; i < canvas.height; i++) {
+        for (let j = 0; j < canvas.width; j++) {
+            if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
+            else {
+                let x_r =
+                    (temp[i - 1][j + 1][0] + 2 * temp[i][j + 1][0] + temp[i + 1][j + 1][0]) -
+                    (temp[i - 1][j - 1][0] + 2 * temp[i][j - 1][0] + temp[i + 1][j - 1][0]);
+                let y_r =
+                    (temp[i - 1][j - 1][0] + 2 * temp[i - 1][j][0] + temp[i - 1][j + 1][0]) -
+                    (temp[i + 1][j - 1][0] + 2 * temp[i + 1][j][0] + temp[i + 1][j + 1][0]);
+
+                let x_g =
+                    (temp[i - 1][j + 1][1] + 2 * temp[i][j + 1][1] + temp[i + 1][j + 1][1]) -
+                    (temp[i - 1][j - 1][1] + 2 * temp[i][j - 1][1] + temp[i + 1][j - 1][1]);
+                let y_g =
+                    (temp[i - 1][j - 1][1] + 2 * temp[i - 1][j][1] + temp[i - 1][j + 1][1]) -
+                    (temp[i + 1][j - 1][1] + 2 * temp[i + 1][j][1] + temp[i + 1][j + 1][1]);
+
+                let x_b =
+                    (temp[i - 1][j + 1][2] + 2 * temp[i][j + 1][2] + temp[i + 1][j + 1][2]) -
+                    (temp[i - 1][j - 1][2] + 2 * temp[i][j - 1][2] + temp[i + 1][j - 1][2]);
+                let y_b =
+                    (temp[i - 1][j - 1][2] + 2 * temp[i - 1][j][2] + temp[i - 1][j + 1][2]) -
+                    (temp[i + 1][j - 1][2] + 2 * temp[i + 1][j][2] + temp[i + 1][j + 1][2]);
+
+                let g_r = Math.sqrt(x_r * x_r + y_r * y_r);
+                let g_g = Math.sqrt(x_g * x_g + y_g * y_g);
+                let g_b = Math.sqrt(x_b * x_b + y_b * y_b);
+
+                outputData[i][j][0] = g_r;
+                outputData[i][j][1] = g_g;
+                outputData[i][j][2] = g_b;
+                outputData[i][j][3] = 255;
+            }
+        }
+    }
+
+    outputData = new Uint8ClampedArray(outputData.toString().split(',').map(v => +v));
+    imgPixels.data.set(outputData);
 
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
@@ -635,9 +681,9 @@ function imageToUolles() {
                     ((temp[i][j][2] + 1) / (temp[i][j - 1][2] + 1))
                 )) / 4;
 
-                outputData[i][j][0] = Number(f_r * 1000);
-                outputData[i][j][1] = Number(f_g * 1000);
-                outputData[i][j][2] = Number(f_b * 1000);
+                outputData[i][j][0] = f_r * 1000;
+                outputData[i][j][1] = f_g * 1000;
+                outputData[i][j][2] = f_b * 1000;
                 outputData[i][j][3] = 255;
             }
         }
@@ -649,75 +695,66 @@ function imageToUolles() {
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
 
-// no
 function imageToStatic() {
     drawByPosition(currentPositionInHistory);
 
     let imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
     let temp = toMatrix(imgPixels.data, imgPixels.width * 4);
-
     for (let i = 0; i < temp.length; i++)
         temp[i] = toMatrix(temp[i], 4);
 
-    for (let j = 0; j < canvas.width; j++) {
-        for (let i = 0; i < canvas.height; i++) {
-            if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
-            else {
-                let summ1_r = temp[i - 1][j][0] + temp[i][j][0] + temp[i + 1][j][0] + temp[i - 1][j - 1][0] + temp[i][j - 1][0] + temp[i + 1][j - 1][0] + temp[i - 1][j + 1][0] + temp[i][j + 1][0] + temp[i + 1][j + 1][0]
-                let summ1_g = temp[i - 1][j][1] + temp[i][j][1] + temp[i + 1][j][1] + temp[i - 1][j - 1][1] + temp[i][j - 1][1] + temp[i + 1][j - 1][1] + temp[i - 1][j + 1][1] + temp[i][j + 1][1] + temp[i + 1][j + 1][1]
-                let summ1_b = temp[i - 1][j][2] + temp[i][j][2] + temp[i + 1][j][2] + temp[i - 1][j - 1][2] + temp[i][j - 1][2] + temp[i + 1][j - 1][2] + temp[i - 1][j + 1][2] + temp[i][j + 1][2] + temp[i + 1][j + 1][2]
+    let temporaryCanvas = document.createElement('canvas');
+    let temporaryCtx = temporaryCanvas.getContext('2d');
+    let outputData = temporaryCtx.createImageData(canvas.width, canvas.height);
+    outputData = toMatrix(outputData.data, outputData.width * 4);
+    for (let i = 0; i < outputData.length; i++)
+        outputData[i] = toMatrix(outputData[i], 4);
 
-                let mu_r = 1 / 9 * summ1_r
-                let mu_g = 1 / 9 * summ1_g
-                let mu_b = 1 / 9 * summ1_b
+        for (let j = 0; j < canvas.width; j++) {
+            for (let i = 0; i < canvas.height; i++) {
+                if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
+                else {
+                let summ1_r = temp[i][j][0] + temp[i + 1][j][0] + temp[i][j + 1][0] + temp[i + 1][j + 1][0];
+                let summ1_g = temp[i][j][1] + temp[i + 1][j][1] + temp[i][j + 1][1] + temp[i + 1][j + 1][1];
+                let summ1_b = temp[i][j][2] + temp[i + 1][j][2] + temp[i][j + 1][2] + temp[i + 1][j + 1][2];
 
-                let summ2_r = (temp[i - 1][j][0] - mu_r) ** 2 + (temp[i][j][0] - mu_r) ** 2 + (temp[i + 1][j][0] - mu_r) ** 2 + temp[i - 1][j - 1][0] + (temp[i][j - 1][0] - mu_r) ** 2 + (temp[i + 1][j - 1][0] - mu_r) ** 2 + (temp[i - 1][j + 1][0] - mu_r) ** 2 + (temp[i][j + 1][0] - mu_r) ** 2 + (temp[i + 1][j + 1][0] - mu_r) ** 2
-                let summ2_g = (temp[i - 1][j][1] - mu_g) ** 2 + (temp[i][j][1] - mu_g) ** 2 + (temp[i + 1][j][1] - mu_g) ** 2 + temp[i - 1][j - 1][1] + (temp[i][j - 1][1] - mu_g) ** 2 + (temp[i + 1][j - 1][1] - mu_g) ** 2 + (temp[i - 1][j + 1][1] - mu_g) ** 2 + (temp[i][j + 1][1] - mu_g) ** 2 + (temp[i + 1][j + 1][1] - mu_g) ** 2
-                let summ2_b = (temp[i - 1][j][2] - mu_b) ** 2 + (temp[i][j][2] - mu_b) ** 2 + (temp[i + 1][j][2] - mu_b) ** 2 + temp[i - 1][j - 1][2] + (temp[i][j - 1][2] - mu_b) ** 2 + (temp[i + 1][j - 1][2] - mu_b) ** 2 + (temp[i - 1][j + 1][2] - mu_b) ** 2 + (temp[i][j + 1][2] - mu_b) ** 2 + (temp[i + 1][j + 1][2] - mu_b) ** 2
+                let mu_r = 1 / 4 * summ1_r;
+                let mu_g = 1 / 4 * summ1_g;
+                let mu_b = 1 / 4 * summ1_b;
 
-                let tau_r = Math.sqrt(1 / 9 * summ2_r)
-                let tau_g = Math.sqrt(1 / 9 * summ2_g)
-                let tau_b = Math.sqrt(1 / 9 * summ2_b)
+                let summ2_r = Math.pow((temp[i][j][0] - mu_r), 2) + Math.pow((temp[i + 1][j][0] - mu_r), 2) + Math.pow((temp[i][j + 1][0] - mu_r), 2) + Math.pow((temp[i + 1][j + 1][0] - mu_r), 2);
+                let summ2_g = Math.pow((temp[i][j][1] - mu_g), 2) + Math.pow((temp[i + 1][j][1] - mu_g), 2) + Math.pow((temp[i][j + 1][1] - mu_g), 2) + Math.pow((temp[i + 1][j + 1][1] - mu_g), 2);
+                let summ2_b = Math.pow((temp[i][j][2] - mu_b), 2) + Math.pow((temp[i + 1][j][2] - mu_b), 2) + Math.pow((temp[i][j + 1][2] - mu_b), 2) + Math.pow((temp[i + 1][j + 1][2] - mu_b), 2);
 
-                let val = 0
+                let tau_r = Math.sqrt(1 / 4 * summ2_r);
+                let tau_g = Math.sqrt(1 / 4 * summ2_g);
+                let tau_b = Math.sqrt(1 / 4 * summ2_b);
 
-                temp[i][j - 1][0] = (tau_r * temp[i][j - 1][0] + val);
-                temp[i][j - 1][1] = (tau_g * temp[i][j - 1][1] + val);
-                temp[i][j - 1][2] = (tau_b * temp[i][j - 1][2] + val);
-                temp[i][j][0] = (tau_r * temp[i][j][0] + val);
-                temp[i][j][1] = (tau_g * temp[i][j][1] + val);
-                temp[i][j][2] = (tau_b * temp[i][j][2] + val);
-                temp[i][j + 1][0] = (tau_r * temp[i][j + 1][0] + val);
-                temp[i][j + 1][1] = (tau_g * temp[i][j + 1][1] + val);
-                temp[i][j + 1][2] = (tau_b * temp[i][j + 1][2] + val);
+                let val = -100;
 
-                temp[i - 1][j - 1][0] = (tau_r * temp[i - 1][j - 1][0] + val);
-                temp[i - 1][j - 1][1] = (tau_g * temp[i - 1][j - 1][1] + val);
-                temp[i - 1][j - 1][2] = (tau_b * temp[i - 1][j - 1][2] + val);
-                temp[i - 1][j][0] = (tau_r * temp[i - 1][j][0] + val);
-                temp[i - 1][j][1] = (tau_g * temp[i - 1][j][1] + val);
-                temp[i - 1][j][2] = (tau_b * temp[i - 1][j][2] + val);
-                temp[i - 1][j + 1][0] = (tau_r * temp[i - 1][j + 1][0] + val);
-                temp[i - 1][j + 1][1] = (tau_g * temp[i - 1][j + 1][1] + val);
-                temp[i - 1][j + 1][2] = (tau_b * temp[i - 1][j + 1][2] + val);
+                outputData[i][j][0] = (tau_r * temp[i][j][0] + val);
+                outputData[i][j][1] = (tau_g * temp[i][j][1] + val);
+                outputData[i][j][2] = (tau_b * temp[i][j][2] + val);
+                outputData[i][j][3] = 255;
+                outputData[i][j + 1][0] = (tau_r * temp[i][j + 1][0] + val);
+                outputData[i][j + 1][1] = (tau_g * temp[i][j + 1][1] + val);
+                outputData[i][j + 1][2] = (tau_b * temp[i][j + 1][2] + val);
+                outputData[i][j + 1][3] = 255;
 
-                temp[i + 1][j - 1][0] = (tau_r * temp[i + 1][j - 1][0] + val);
-                temp[i + 1][j - 1][1] = (tau_g * temp[i + 1][j - 1][1] + val);
-                temp[i + 1][j - 1][2] = (tau_b * temp[i + 1][j - 1][2] + val);
-                temp[i + 1][j][0] = (tau_r * temp[i + 1][j][0] + val);
-                temp[i + 1][j][1] = (tau_g * temp[i + 1][j][1] + val);
-                temp[i + 1][j][2] = (tau_b * temp[i + 1][j][2] + val);
-                temp[i + 1][j + 1][0] = (tau_r * temp[i + 1][j + 1][0] + val);
-                temp[i + 1][j + 1][1] = (tau_g * temp[i + 1][j + 1][1] + val);
-                temp[i + 1][j + 1][2] = (tau_b * temp[i + 1][j + 1][2] + val);
+                outputData[i + 1][j][0] = (tau_r * temp[i + 1][j][0] + val);
+                outputData[i + 1][j][1] = (tau_g * temp[i + 1][j][1] + val);
+                outputData[i + 1][j][2] = (tau_b * temp[i + 1][j][2] + val);
+                outputData[i + 1][j][3] = 255;
+                outputData[i + 1][j + 1][0] = (tau_r * temp[i + 1][j + 1][0] + val);
+                outputData[i + 1][j + 1][1] = (tau_g * temp[i + 1][j + 1][1] + val);
+                outputData[i + 1][j + 1][2] = (tau_b * temp[i + 1][j + 1][2] + val);
+                outputData[i + 1][j + 1][3] = 255;
             }
         }
     }
 
-    temp = new Uint8ClampedArray(temp.toString().split(',').map(v => +v));
-
-    imgPixels.data.set(temp);
+    outputData = new Uint8ClampedArray(outputData.toString().split(',').map(v => +v));
+    imgPixels.data.set(outputData);
 
     ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
 }
