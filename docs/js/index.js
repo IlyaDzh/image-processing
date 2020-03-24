@@ -193,13 +193,6 @@ function toMatrix(array, chunkSize) {
     return R;
 }
 
-function add_mod8(x, y) {
-    let summ = x + y;
-    if (summ > 7)
-        summ = summ - 8;
-    return summ;
-}
-
 function convolution(pixels, weights) {
     let side = Math.round(Math.sqrt(weights.length));
     let halfSide = Math.floor(side / 2);
@@ -710,10 +703,10 @@ function imageToStatic() {
     for (let i = 0; i < outputData.length; i++)
         outputData[i] = toMatrix(outputData[i], 4);
 
-        for (let j = 0; j < canvas.width; j++) {
-            for (let i = 0; i < canvas.height; i++) {
-                if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
-                else {
+    for (let j = 0; j < canvas.width; j++) {
+        for (let i = 0; i < canvas.height; i++) {
+            if (i == 0 || j == 0 || i + 1 == canvas.height || j + 1 == canvas.width) { }
+            else {
                 let summ1_r = temp[i][j][0] + temp[i + 1][j][0] + temp[i][j + 1][0] + temp[i + 1][j + 1][0];
                 let summ1_g = temp[i][j][1] + temp[i + 1][j][1] + temp[i][j + 1][1] + temp[i + 1][j + 1][1];
                 let summ1_b = temp[i][j][2] + temp[i + 1][j][2] + temp[i][j + 1][2] + temp[i + 1][j + 1][2];
